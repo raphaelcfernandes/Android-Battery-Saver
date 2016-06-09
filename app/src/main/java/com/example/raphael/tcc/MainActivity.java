@@ -19,7 +19,7 @@ public class MainActivity extends Activity{
     ProcessesRunning pR;
     File file;
     String teste="myfile";
-    StringBuilder teste3;
+    StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
     GpsManager manager;
     BluetoothManager blueT;
@@ -42,10 +42,11 @@ public class MainActivity extends Activity{
     private void methodCalls(){
         Button bgElement = (Button) findViewById(R.id.button);
         bgElement.setBackgroundColor(Color.GREEN);
-        teste3 = new StringBuilder(pR.setProcessesRunning());
-        teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
+        teste3.delete(0, teste3.length());
+        teste3 = new StringBuilder(pR.getCores());
+        /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
-                + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");
+                + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");*/
         file = new File(this.getApplicationContext().getFilesDir(), teste);
         try {
             outputStream = openFileOutput(teste, Context.MODE_PRIVATE);
