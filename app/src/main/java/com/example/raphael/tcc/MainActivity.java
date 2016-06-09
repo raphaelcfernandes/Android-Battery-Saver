@@ -1,10 +1,9 @@
 package com.example.raphael.tcc;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -58,19 +57,7 @@ public class MainActivity extends Activity{
             e.printStackTrace();
         }
     }
-    private String get_network() {
-        String network_type="UNKNOWN";//maybe usb reverse tethering
-        NetworkInfo active_network=((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        if (active_network!=null && active_network.isConnectedOrConnecting()) {
-            if (active_network.getType()==ConnectivityManager.TYPE_WIFI) {
-                network_type="WIFI";
-            }
-            else if (active_network.getType()==ConnectivityManager.TYPE_MOBILE) {
-                network_type=((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo().getSubtypeName();
-            }
-        }
-        return network_type;
-    }
+
     private long memoryAvailable(){
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
