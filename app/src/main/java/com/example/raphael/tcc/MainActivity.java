@@ -20,17 +20,19 @@ public class MainActivity extends Activity{
     String teste="myfile";
     StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
-    GpsManager manager;
+    GpsManager gpsManager;
     BluetoothManager blueT;
+    NetworkManager networkManager;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button Up = (Button) findViewById(R.id.button);
         b1 = new BattManager();
         pR = new ProcessesRunning();
-        manager = new GpsManager();
+        gpsManager = new GpsManager();
         blueT = new BluetoothManager();
-        b1.setBatteryStatus(this.getApplicationContext());
+        networkManager = new NetworkManager();
+//        b1.setBatteryStatus(this.getApplicationContext());
         Up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,6 +48,7 @@ public class MainActivity extends Activity{
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
                 + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");*/
+        System.out.println(b1.getBatteryStatus(this.getApplicationContext()));
         file = new File(this.getApplicationContext().getFilesDir(), teste);
         try {
             outputStream = openFileOutput(teste, Context.MODE_PRIVATE);

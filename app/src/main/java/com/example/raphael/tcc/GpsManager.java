@@ -16,3 +16,4 @@ public class GpsManager {
             return 0;
     }
 }
+//Funcionando 100%

@@ -9,14 +9,13 @@ import android.content.IntentFilter;
  */
 public class BattManager {
     private float atributo;
-    public void setBatteryStatus(Context context){
+    public float getBatteryStatus(Context context){
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.getApplicationContext().registerReceiver(null, ifilter);
         int status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_SCALE,-1);
         this.atributo=(status/(float)scale)*100;
-    }
-    public float getBatteryStatus(){
         return this.atributo;
     }
 }
+//Está funcionando 100%

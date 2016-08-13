@@ -15,3 +15,5 @@ public class BluetoothManager {
             return 0;
     }
 }
+
+//Funcionando 100%
