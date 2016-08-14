@@ -2,23 +2,20 @@ package com.example.raphael.tcc;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity{
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-
-    BattManager b1;
+    private int minInterval = 5000;
+    private Handler mHandler;
+    BatteryManager b1;
     CpuManager pR;
     File file;
     String teste="myfile";
@@ -30,39 +27,44 @@ public class MainActivity extends Activity{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Button Up = (Button) findViewById(R.id.button);
-        b1 = new BattManager();
+        b1 = new BatteryManager();
         pR = new CpuManager();
         gpsManager = new GpsManager();
         blueT = new BluetoothManager();
         networkManager = new NetworkManager();
+        mHandler = new Handler();
     }
     public void onResume(){
         super.onResume();
-        methodCalls();
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                methodCalls();
+            }
+        },0,3000);
     }
     public void sendMessage(View view){
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = (EditText) findViewById(R.id.edit_message);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
+        //Intent intent = new Intent(this, DisplayMessageActivity.class);
+        //EditText editText = (EditText) findViewById(R.id.edit_message);
+        //String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, message);
+        //startActivity(intent);
     }
+
     public void onDestroy(){
         super.onDestroy();
         android.os.Debug.stopMethodTracing();
     }
 
     private void methodCalls(){
-        Button bgElement = (Button) findViewById(R.id.button);
-        bgElement.setBackgroundColor(Color.GREEN);
-        teste3.delete(0, teste3.length());
+        //teste3.delete(0, teste3.length());
         //teste3 = new StringBuilder(pR.getCores());
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
                 + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");*/
-        System.out.println(pR.getNumberOfCores());
-        file = new File(this.getApplicationContext().getFilesDir(), teste);
+        System.out.println(pR.getCoreUtilization(0));
+        /*file = new File(this.getApplicationContext().getFilesDir(), teste);
         try {
             outputStream = openFileOutput(teste, Context.MODE_PRIVATE);
             outputStream.write(teste3.toString().getBytes());
@@ -71,7 +73,7 @@ public class MainActivity extends Activity{
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private long memoryAvailable(){

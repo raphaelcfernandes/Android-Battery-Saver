@@ -7,7 +7,7 @@ import android.content.IntentFilter;
 /**
  * Created by Raphael on 08-Apr-16.
  */
-public class BattManager {
+public class BatteryManager {
     private float atributo;
     public float getBatteryStatus(Context context){
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
