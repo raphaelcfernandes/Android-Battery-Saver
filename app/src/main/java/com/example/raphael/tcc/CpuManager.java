@@ -4,10 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-/**
- * Created by Raphael on 18-Apr-16.
- */
-public class ProcessesRunning {
+public class CpuManager {
+    private int numberOfCores;
+
+    CpuManager(){
+        String cores;
+        try {
+            cores = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/present "));
+            this.numberOfCores = Character.getNumericValue(cores.charAt(2))+1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setProcessesRunning() {
         Process p;
         try {
@@ -17,13 +26,7 @@ public class ProcessesRunning {
             e.printStackTrace();
         }
     }
-    public String getCores() {
-        Process p;
-        StringBuilder cores = new StringBuilder();
-        int ini, fim;
-        System.out.println(getCoreUtilization(0));
-        return cores.toString();
-    }
+
     public int getCoreUtilization(int coreNumber){
         StringBuilder path = new StringBuilder();
         path.append("cat /sys/devices/system/cpu/cpu" + coreNumber + "/cpufreq/cpu_utilization");
@@ -61,14 +64,8 @@ public class ProcessesRunning {
         return speed;
     }
 
-    public String getNumberOfCores() {
-        String cores = null;
-        try {
-            cores = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/online "));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cores;
+    public int getNumberOfCores() {
+        return this.numberOfCores;
     }
 
     private String returnStringFromProcess(Process proc) throws IOException {

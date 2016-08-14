@@ -7,17 +7,10 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.raphael.tcc.MainActivity">
+    tools:context="com.example.raphael.tcc.DisplayMessageActivity">
 
-    <EditText
-        android:id="@+id/edit_message"
-        android:layout_width="170px"
-        android:layout_height="150px" />
-    <Button
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ativar"
-        android:id="@+id/button"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:id="@+id/activity_display_message"/>
 </RelativeLayout>
