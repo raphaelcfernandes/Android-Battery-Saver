@@ -3,10 +3,6 @@ package com.example.raphael.tcc;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,22 +23,24 @@ public class MainActivity extends Activity{
     GpsManager gpsManager = new GpsManager();
     BluetoothManager blueT = new BluetoothManager();
     NetworkManager networkManager = new NetworkManager();
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
+
     public void onResume(){
         super.onResume();
-        beepForAnHour();
+        periodicallyCheck();
     }
 
-    public void beepForAnHour() {
+    public void periodicallyCheck() {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 methodCalls();
             }
-        },0,5,SECONDS);
+        },1,5,SECONDS);
     }
 
 
@@ -56,15 +54,17 @@ public class MainActivity extends Activity{
         System.out.println("Nivel de bateria: "+b1.getBatteryStatus(this.getApplicationContext()));
         System.out.println("Bluetooth: "+blueT.getBluetoothStatus());
         System.out.println("NetWork: "+networkManager.get_network(this.getApplicationContext()));
-        if(pR.isCoreOnline(0)){
-            System.out.println("OK");
+        for(int i=0;i<4;++i) {
+            if (pR.isCoreOnline(i)) {
+                System.out.println("Core "+i+": "+"online");
+                System.out.println("Governor: "+pR.getGovernorOfCore(i));
+                System.out.println("Speed: "+pR.getSpeedOfCore(i));
+                System.out.println("Utilization: "+pR.getCoreUtilization(i));
+            }
+            else
+                System.out.println("Core "+i+": "+"offline");
         }
-
-
-
-
-
-        //teste3.delete(0, teste3.length());
+       //teste3.delete(0, teste3.length());
         //teste3 = new StringBuilder(pR.getCores());
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
