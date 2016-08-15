@@ -68,6 +68,23 @@ public class CpuManager {
         return this.numberOfCores;
     }//ok
 
+    public boolean isCoreOnline(int coreNumber){
+        StringBuilder path = new StringBuilder();
+        path.append(pathCPU + coreNumber + "/online");
+        String p = null;
+        int result=0;
+        try {
+            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
+            result = Character.getNumericValue(p.charAt(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(result==1)
+            return true;
+        else
+            return false;
+    }
+
     private String returnStringFromProcess(Process proc) throws IOException {
         StringBuilder ps = new StringBuilder();
         String s;

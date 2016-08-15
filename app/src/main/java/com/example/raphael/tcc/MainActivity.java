@@ -3,54 +3,48 @@ package com.example.raphael.tcc;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
+import android.os.SystemClock;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class MainActivity extends Activity{
-    public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-    private int minInterval = 5000;
-    private Handler mHandler;
-    BatteryManager b1;
-    CpuManager pR;
+    private final ScheduledExecutorService scheduler =
+            Executors.newSingleThreadScheduledExecutor();
     File file;
     String teste="myfile";
     StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
-    GpsManager gpsManager;
-    BluetoothManager blueT;
-    NetworkManager networkManager;
+    BatteryManager b1 = new BatteryManager();
+    CpuManager pR = new CpuManager();
+    GpsManager gpsManager = new GpsManager();
+    BluetoothManager blueT = new BluetoothManager();
+    NetworkManager networkManager = new NetworkManager();
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        b1 = new BatteryManager();
-        pR = new CpuManager();
-        gpsManager = new GpsManager();
-        blueT = new BluetoothManager();
-        networkManager = new NetworkManager();
-        mHandler = new Handler();
     }
     public void onResume(){
         super.onResume();
-        Timer t = new Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
+        beepForAnHour();
+    }
+
+    public void beepForAnHour() {
+        scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 methodCalls();
             }
-        },0,3000);
+        },0,5,SECONDS);
     }
-    public void sendMessage(View view){
-        //Intent intent = new Intent(this, DisplayMessageActivity.class);
-        //EditText editText = (EditText) findViewById(R.id.edit_message);
-        //String message = editText.getText().toString();
-        //intent.putExtra(EXTRA_MESSAGE, message);
-        //startActivity(intent);
-    }
+
 
     public void onDestroy(){
         super.onDestroy();
@@ -58,12 +52,23 @@ public class MainActivity extends Activity{
     }
 
     private void methodCalls(){
+        System.out.println("GPS: "+gpsManager.getStatusGps(this.getApplicationContext()));
+        System.out.println("Nivel de bateria: "+b1.getBatteryStatus(this.getApplicationContext()));
+        System.out.println("Bluetooth: "+blueT.getBluetoothStatus());
+        System.out.println("NetWork: "+networkManager.get_network(this.getApplicationContext()));
+        if(pR.isCoreOnline(0)){
+            System.out.println("OK");
+        }
+
+
+
+
+
         //teste3.delete(0, teste3.length());
         //teste3 = new StringBuilder(pR.getCores());
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
                 + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");*/
-        System.out.println(pR.getCoreUtilization(0));
         /*file = new File(this.getApplicationContext().getFilesDir(), teste);
         try {
             outputStream = openFileOutput(teste, Context.MODE_PRIVATE);
