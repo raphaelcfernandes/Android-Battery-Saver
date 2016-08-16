@@ -2,10 +2,14 @@ package com.example.raphael.tcc;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -23,6 +27,7 @@ public class MainActivity extends Activity{
     GpsManager gpsManager = new GpsManager();
     BluetoothManager blueT = new BluetoothManager();
     NetworkManager networkManager = new NetworkManager();
+    private Handler mHandler = new Handler();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,9 +36,9 @@ public class MainActivity extends Activity{
 
     public void onResume(){
         super.onResume();
-        periodicallyCheck();
+        System.out.println(pR.getNumberOfCores());
+        //periodicallyCheck();
     }
-
     public void periodicallyCheck() {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -43,18 +48,25 @@ public class MainActivity extends Activity{
         },1,5,SECONDS);
     }
 
-
     public void onDestroy(){
         super.onDestroy();
         android.os.Debug.stopMethodTracing();
     }
-
+    /*public void teste(){
+        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
+        Iterator<ActivityManager.RunningAppProcessInfo> i = l.iterator();
+        while (i.hasNext()) {
+            ActivityManager.RunningAppProcessInfo info = i.next();
+            System.out.println(info.processName);
+        }
+    }*/
     private void methodCalls(){
         System.out.println("GPS: "+gpsManager.getStatusGps(this.getApplicationContext()));
         System.out.println("Nivel de bateria: "+b1.getBatteryStatus(this.getApplicationContext()));
         System.out.println("Bluetooth: "+blueT.getBluetoothStatus());
         System.out.println("NetWork: "+networkManager.get_network(this.getApplicationContext()));
-        for(int i=0;i<4;++i) {
+        for(int i=0;i<pR.getNumberOfCores();++i) {
             if (pR.isCoreOnline(i)) {
                 System.out.println("Core "+i+": "+"online");
                 System.out.println("Governor: "+pR.getGovernorOfCore(i));

@@ -1,20 +1,29 @@
 package com.example.raphael.tcc;
 
+import android.os.Build;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Pattern;
 
 public class CpuManager {
     private int numberOfCores;
     private String pathCPU = "cat /sys/devices/system/cpu/cpu";
 
     CpuManager(){
-        String cores;
-        try {
-            cores = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/present"));
-            this.numberOfCores = Character.getNumericValue(cores.charAt(2))+1;
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(Build.VERSION.SDK_INT>=17){
+            this.numberOfCores = Runtime.getRuntime().availableProcessors();
+        }
+        else {
+            int i = new File("/sys/devices/system/cpu/").listFiles(new FileFilter() {
+                public boolean accept(File params){
+                    return Pattern.matches("cpu[0-9]", params.getName());
+                }
+            }).length;
+            this.numberOfCores = i;
         }
     }
 
