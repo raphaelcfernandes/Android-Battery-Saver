@@ -1,7 +1,9 @@
 package com.example.raphael.tcc;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationManager;
+import android.provider.Settings;
 
 /**
  * Created by Raphael on 20-Apr-16.

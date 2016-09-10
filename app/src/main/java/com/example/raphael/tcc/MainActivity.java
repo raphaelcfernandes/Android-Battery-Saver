@@ -2,14 +2,13 @@ package com.example.raphael.tcc;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -28,15 +27,15 @@ public class MainActivity extends Activity{
     BluetoothManager blueT = new BluetoothManager();
     NetworkManager networkManager = new NetworkManager();
     private Handler mHandler = new Handler();
-
+    Intent mServiceIntent;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        startService(new Intent(getBaseContext(),BackgroundService.class));
     }
 
     public void onResume(){
         super.onResume();
-        System.out.println(pR.getNumberOfCores());
         //periodicallyCheck();
     }
     public void periodicallyCheck() {
@@ -46,6 +45,12 @@ public class MainActivity extends Activity{
                 methodCalls();
             }
         },1,5,SECONDS);
+    }
+    public void startService(View view){
+        startService(new Intent(getBaseContext(),BackgroundService.class));
+    }
+    public void stopService(View view){
+        stopService(new Intent(getBaseContext(),BackgroundService.class));
     }
 
     public void onDestroy(){
@@ -97,7 +102,6 @@ public class MainActivity extends Activity{
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         activityManager.getMemoryInfo(mi);
-        long availableMegs = mi.availMem / 1048576L;
-        return availableMegs;
+        return mi.availMem / 1048576L;
     }
 }
