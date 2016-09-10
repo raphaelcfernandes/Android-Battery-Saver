@@ -13,14 +13,14 @@
         android:layout_width="150dp"
         android:layout_height="40dp"
         android:clickable="true"
-        android:string="@ativar"
+        android:text="ativar"
         android:onClick="startService"/>
     <Button
         android:layout_alignParentEnd="true"
         android:layout_width="150dp"
         android:layout_height="40dp"
         android:clickable="true"
-        android:string="@Desativar"
+        android:text="Desativar"
         android:onClick="stopService"/>
 
 </RelativeLayout>
