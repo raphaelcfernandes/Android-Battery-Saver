@@ -15,10 +15,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Pattern;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -42,7 +44,6 @@ public class BackgroundService extends Service {
                 System.out.println(s);
                 if(s.equals("com.android.vending")){
                     Intent intent = new Intent(CUSTOM_INTENT);
-
                     sendBroadcast(intent);
                 }
             }
