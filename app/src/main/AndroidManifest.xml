@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_LOGS"    />
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 
     <application
         android:fullBackupContent="true"
@@ -22,7 +23,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".BackgroundService"/>
+
+        <receiver android:name=".MyReceiver" android:enabled="true"/>
+        <intent-filter>
+            <action android:name="com.example.raphael.tcc"/>
+        </intent-filter>
+
     </application>
 
 </manifest>

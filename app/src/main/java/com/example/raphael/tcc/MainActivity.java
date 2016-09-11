@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,7 +33,12 @@ public class MainActivity extends Activity{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //startService(new Intent(getBaseContext(),BackgroundService.class));
+        startService(new Intent(getBaseContext(),BackgroundService.class));
+        Intent brightnessIntent = this.getIntent();
+        float brightness = brightnessIntent.getFloatExtra("brightness value", 0);
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = 50;
+        getWindow().setAttributes(lp);
     }
 
     public void onResume(){
@@ -52,21 +58,14 @@ public class MainActivity extends Activity{
     }
     public void stopService(View view){
         stopService(new Intent(getBaseContext(),BackgroundService.class));
+
     }
 
     public void onDestroy(){
         super.onDestroy();
         android.os.Debug.stopMethodTracing();
     }
-    /*public void teste(){
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
-        Iterator<ActivityManager.RunningAppProcessInfo> i = l.iterator();
-        while (i.hasNext()) {
-            ActivityManager.RunningAppProcessInfo info = i.next();
-            System.out.println(info.processName);
-        }
-    }*/
+
     private void methodCalls(){
         System.out.println("GPS: "+gpsManager.getStatusGps(this.getApplicationContext()));
         System.out.println("Nivel de bateria: "+b1.getBatteryStatus(this.getApplicationContext()));
