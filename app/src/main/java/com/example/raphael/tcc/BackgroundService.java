@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,36 +31,13 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this,"Service Started", Toast.LENGTH_LONG).show();
-
         Timer timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                /*try {
-                    Process mLogcatProc = null;
-                    BufferedReader reader = null;
-                    mLogcatProc = Runtime.getRuntime().exec(new String[]{"logcat", "-d"});
-                    String line;
-                    reader = new BufferedReader(new InputStreamReader(mLogcatProc.getInputStream()));
-
-                    final StringBuilder log = new StringBuilder();
-                    String separator = System.getProperty("line.separator");
-                    while ((line = reader.readLine()) != null)
-                    {
-                        log.append(line);
-                        log.append(separator);
-                    }
-                    String w = log.toString();
-                    Toast.makeText(getApplicationContext(),w, Toast.LENGTH_LONG).show();
-                }
-                catch (Exception e)
-                {
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                }*/
                     File[] files = new File("/proc").listFiles();
                     int lowestOomScore = Integer.MAX_VALUE;
                     String foregroundProcess = null;
-
                     for (File file : files) {
                         if (!file.isDirectory()) {
                             continue;
@@ -159,6 +135,7 @@ public class BackgroundService extends Service {
         reader.close();
         return output.toString();
     }
+
     @Override
     public void onCreate(){
         this.context=context;
