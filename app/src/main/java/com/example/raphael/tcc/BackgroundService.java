@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -40,9 +41,9 @@ public class BackgroundService extends Service {
                 s=getAppRunningForeground();
                 System.out.println(s);
                 if(s.equals("com.android.vending")){
-                    Intent intent = new Intent();
-                    intent.setAction(CUSTOM_INTENT);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    Intent intent = new Intent(CUSTOM_INTENT);
+
+                    sendBroadcast(intent);
                 }
             }
         },1,2,SECONDS);

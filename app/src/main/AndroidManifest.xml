@@ -26,7 +26,6 @@
 
         <service android:name=".BackgroundService"/>
 
-        <receiver android:name=".MyReceiver" android:enabled="true"/>
         <intent-filter>
             <action android:name="com.example.raphael.tcc"/>
         </intent-filter>

@@ -2,10 +2,16 @@ package com.example.raphael.tcc;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -28,17 +34,21 @@ public class MainActivity extends Activity{
     BluetoothManager blueT = new BluetoothManager();
     NetworkManager networkManager = new NetworkManager();
 
+    private BroadcastReceiver receiver;
     private Handler mHandler = new Handler();
-    Intent mServiceIntent;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        IntentFilter filter = new IntentFilter("com.example.raphael.tcc");
+
         startService(new Intent(getBaseContext(),BackgroundService.class));
-        Intent brightnessIntent = this.getIntent();
-        float brightness = brightnessIntent.getFloatExtra("brightness value", 0);
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.screenBrightness = 50;
-        getWindow().setAttributes(lp);
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                System.out.println("Recebi o comando");
+            }
+        };
+        registerReceiver(receiver,filter);
     }
 
     public void onResume(){
@@ -62,6 +72,11 @@ public class MainActivity extends Activity{
     }
 
     public void onDestroy(){
+        super.onDestroy();
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
         super.onDestroy();
         android.os.Debug.stopMethodTracing();
     }
