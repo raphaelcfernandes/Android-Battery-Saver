@@ -26,12 +26,13 @@ public class MainActivity extends Activity{
     GpsManager gpsManager = new GpsManager();
     BluetoothManager blueT = new BluetoothManager();
     NetworkManager networkManager = new NetworkManager();
+
     private Handler mHandler = new Handler();
     Intent mServiceIntent;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startService(new Intent(getBaseContext(),BackgroundService.class));
+        //startService(new Intent(getBaseContext(),BackgroundService.class));
     }
 
     public void onResume(){
