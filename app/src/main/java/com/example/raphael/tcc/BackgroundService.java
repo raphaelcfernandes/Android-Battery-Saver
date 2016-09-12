@@ -28,6 +28,7 @@ public class BackgroundService extends Service {
     private Context context;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     public static final String CUSTOM_INTENT="com.example.raphael.tcc";
+    BrightnessManager brightnessManager = new BrightnessManager();
     String s;
     @Nullable
     @Override
@@ -41,10 +42,13 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 s=getAppRunningForeground();
-                System.out.println(s);
+                //System.out.println(s);
                 if(s.equals("com.android.vending")){
                     Intent intent = new Intent(CUSTOM_INTENT);
                     sendBroadcast(intent);
+                    System.out.println(brightnessManager.getScreenBrightnessLevel());
+                    brightnessManager.setBrightnessLevel(1);
+                    System.out.println(brightnessManager.getScreenBrightnessLevel());
                 }
             }
         },1,2,SECONDS);

@@ -45,7 +45,7 @@ public class MainActivity extends Activity{
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                System.out.println("Recebi o comando");
+               // System.out.println("Recebi o comando");
             }
         };
         registerReceiver(receiver,filter);
