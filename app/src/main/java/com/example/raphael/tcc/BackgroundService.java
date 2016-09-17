@@ -1,34 +1,36 @@
 package com.example.raphael.tcc;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
+import android.graphics.PixelFormat;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.regex.Pattern;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
-    private Context context;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     public static final String CUSTOM_INTENT="com.example.raphael.tcc";
+    private TextView teste;
     BrightnessManager brightnessManager = new BrightnessManager();
+    private ImageView chatHead;
+    private WindowManager windowManager;
     String s;
     @Nullable
     @Override
@@ -67,6 +69,53 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        chatHead = new ImageView(this);
+        chatHead.setImageResource(R.mipmap.ic_cross_symbol);
+
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+        params.x = 100;
+        params.y = 100;
+        windowManager.addView(chatHead, params);
+        chatHead.setOnTouchListener(new View.OnTouchListener(){
+            private final static int MAX_CLICK_DURATION = 200;
+            private long startClickTime;
+            private int initialX;
+            private int initialY;
+            private float initialTouchX;
+            private float initialTouchY;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initialX = params.x;
+                        initialY = params.y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        startClickTime = Calendar.getInstance().getTimeInMillis();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if(Calendar.getInstance().getTimeInMillis() - startClickTime < MAX_CLICK_DURATION) {
+                            System.out.println("apertei kct");
+                            teste.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        windowManager.updateViewLayout(chatHead, params);
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -75,7 +124,7 @@ public class BackgroundService extends Service {
         stopSelf();
     }
 
-    public static String getAppRunningForeground(){
+    private static String getAppRunningForeground(){
         int pid;
         File[] files = new File("/proc").listFiles();
         int lowestOomScore = Integer.MAX_VALUE;

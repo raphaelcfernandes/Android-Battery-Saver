@@ -3,16 +3,12 @@ package com.example.raphael.tcc;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,7 +36,6 @@ public class MainActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         IntentFilter filter = new IntentFilter("com.example.raphael.tcc");
-
         startService(new Intent(getBaseContext(),BackgroundService.class));
         receiver = new BroadcastReceiver() {
             @Override
