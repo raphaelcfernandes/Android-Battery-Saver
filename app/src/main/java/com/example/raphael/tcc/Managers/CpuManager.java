@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
 
@@ -13,7 +13,7 @@ public class CpuManager {
     private int numberOfCores;
     private String pathCPU = "cat /sys/devices/system/cpu/cpu";
 
-    CpuManager(){
+    public CpuManager(){
         if(Build.VERSION.SDK_INT>=17){
             this.numberOfCores = Runtime.getRuntime().availableProcessors();
         }

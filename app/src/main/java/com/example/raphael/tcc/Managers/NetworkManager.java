@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.Managers;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

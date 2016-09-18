@@ -10,6 +10,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 
+import com.example.raphael.tcc.Managers.BatteryManager;
+import com.example.raphael.tcc.Managers.BluetoothManager;
+import com.example.raphael.tcc.Managers.CpuManager;
+import com.example.raphael.tcc.Managers.GpsManager;
+import com.example.raphael.tcc.Managers.NetworkManager;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.concurrent.Executors;
@@ -31,7 +37,7 @@ public class MainActivity extends Activity{
     NetworkManager networkManager = new NetworkManager();
 
     private BroadcastReceiver receiver;
-    private Handler mHandler = new Handler();
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -40,7 +46,7 @@ public class MainActivity extends Activity{
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-               // System.out.println("Recebi o comando");
+               System.out.println("Recebi o comando, to na main");
             }
         };
         registerReceiver(receiver,filter);
@@ -48,22 +54,13 @@ public class MainActivity extends Activity{
 
     public void onResume(){
         super.onResume();
-        //periodicallyCheck();
     }
-    public void periodicallyCheck() {
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                methodCalls();
-            }
-        },1,5,SECONDS);
-    }
+
     public void startService(View view){
-        startService(new Intent(getBaseContext(),BackgroundService.class));
+        startService(new Intent(this,BackgroundService.class));
     }
     public void stopService(View view){
-        stopService(new Intent(getBaseContext(),BackgroundService.class));
-
+        stopService(new Intent(this,BackgroundService.class));
     }
 
     public void onDestroy(){
@@ -77,20 +74,6 @@ public class MainActivity extends Activity{
     }
 
     private void methodCalls(){
-        System.out.println("GPS: "+gpsManager.getStatusGps(this.getApplicationContext()));
-        System.out.println("Nivel de bateria: "+b1.getBatteryStatus(this.getApplicationContext()));
-        System.out.println("Bluetooth: "+blueT.getBluetoothStatus());
-        System.out.println("NetWork: "+networkManager.get_network(this.getApplicationContext()));
-        for(int i=0;i<pR.getNumberOfCores();++i) {
-            if (pR.isCoreOnline(i)) {
-                System.out.println("Core "+i+": "+"online");
-                System.out.println("Governor: "+pR.getGovernorOfCore(i));
-                System.out.println("Speed: "+pR.getSpeedOfCore(i));
-                System.out.println("Utilization: "+pR.getCoreUtilization(i));
-            }
-            else
-                System.out.println("Core "+i+": "+"offline");
-        }
        //teste3.delete(0, teste3.length());
         //teste3 = new StringBuilder(pR.getCores());
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
@@ -108,10 +91,4 @@ public class MainActivity extends Activity{
         }*/
     }
 
-    private long memoryAvailable(){
-        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        activityManager.getMemoryInfo(mi);
-        return mi.availMem / 1048576L;
-    }
 }

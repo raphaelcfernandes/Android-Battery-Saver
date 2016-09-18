@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.Managers;
 
 import android.content.Context;
 import android.location.LocationManager;
@@ -16,4 +16,3 @@ public class GpsManager {
             return 0;
     }
 }
-//Funcionando 100%

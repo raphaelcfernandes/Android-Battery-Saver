@@ -10,6 +10,7 @@
     tools:context="com.example.raphael.tcc.MainActivity">
 
     <Button
+        android:id="@+id/ativar"
         android:layout_width="150dp"
         android:layout_height="40dp"
         android:clickable="true"
@@ -22,6 +23,5 @@
         android:clickable="true"
         android:text="Desativar"
         android:onClick="stopService"/>
-
 
 </RelativeLayout>

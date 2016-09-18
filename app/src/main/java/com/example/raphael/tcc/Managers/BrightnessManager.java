@@ -1,4 +1,6 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.Managers;
+
+import com.example.raphael.tcc.ReadFile;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -9,10 +11,11 @@ import java.io.IOException;
  */
 public class BrightnessManager {
     //Files can be found at /sys/class/leds/lcd-backlight/
+    private ReadFile readFile = new ReadFile();
     public String getScreenBrightnessLevel(){
         String s = null;
         try {
-            s = read("/sys/class/leds/lcd-backlight/brightness");
+            s = readFile.read("/sys/class/leds/lcd-backlight/brightness");
         } catch (IOException e) {
             e.printStackTrace();
         }
