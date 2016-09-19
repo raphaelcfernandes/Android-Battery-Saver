@@ -1,18 +1,12 @@
 package com.example.raphael.tcc;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import java.util.Calendar;
@@ -20,10 +14,8 @@ import java.util.Calendar;
 public class FeedbackButton{
     private WindowManager windowManager;
     private ImageView floatingButton;
-    private boolean mIsFloatingView = false;
-    private BroadcastReceiver receiver;
+
     public void createFeedBackButton(Context context){
-        mIsFloatingView=true;
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         floatingButton = new ImageView(context);
         floatingButton.setImageResource(R.mipmap.ic_cross_symbol);
@@ -74,7 +66,6 @@ public class FeedbackButton{
     public void removeView() {
         if (floatingButton != null){
             windowManager.removeView(floatingButton);
-            mIsFloatingView = false;
         }
     }
 }
