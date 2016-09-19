@@ -1,13 +1,11 @@
 package com.example.raphael.tcc;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 
 import com.example.raphael.tcc.Managers.BatteryManager;
@@ -21,21 +19,11 @@ import java.io.FileOutputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 public class MainActivity extends Activity{
-    private final ScheduledExecutorService scheduler =
-            Executors.newSingleThreadScheduledExecutor();
     File file;
     String teste="myfile";
     StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
-    BatteryManager b1 = new BatteryManager();
-    CpuManager pR = new CpuManager();
-    GpsManager gpsManager = new GpsManager();
-    BluetoothManager blueT = new BluetoothManager();
-    NetworkManager networkManager = new NetworkManager();
-
     private BroadcastReceiver receiver;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -46,7 +34,7 @@ public class MainActivity extends Activity{
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-               System.out.println("Recebi o comando, to na main");
+              // System.out.println("Recebi o comando, to na main");
             }
         };
         registerReceiver(receiver,filter);

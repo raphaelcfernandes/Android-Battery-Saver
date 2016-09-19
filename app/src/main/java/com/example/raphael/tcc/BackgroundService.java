@@ -18,10 +18,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     public static final String CUSTOM_INTENT="com.example.raphael.tcc";
-
     private BrightnessManager brightnessManager = new BrightnessManager();
     private AppManager appManager = new AppManager();
-
+    private FeedbackButton feedbackButton = new FeedbackButton();
     String s;
     @Nullable
     @Override
@@ -36,10 +35,10 @@ public class BackgroundService extends Service {
             public void run() {
                 s=appManager.getAppRunningForeground();
                 System.out.println(s);
-                if(!s.equals("com.android.launcher")){
+                if(s.equals("com.android.vending")){
                     Intent intent = new Intent(CUSTOM_INTENT);
                     sendBroadcast(intent);
-                    brightnessManager.setBrightnessLevel(1);
+                    brightnessManager.setBrightnessLevel(50);
                 }
             }
         },1,2,SECONDS);
@@ -50,13 +49,13 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-        //feedbackButton.createFeedBackButton(this.getApplicationContext());
-    }
-
+        feedbackButton.createFeedBackButton(getApplicationContext());
+   }
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
         stopSelf();
+        feedbackButton.removeView();
     }
 }
