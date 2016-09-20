@@ -17,14 +17,13 @@ public class Teste extends Activity {
     @Override
     public void onCreate(Bundle savedInstancedBundle){
         super.onCreate(savedInstancedBundle);
+        setContentView(R.layout.custom_dialog);
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.x = -20;
-        params.height = 100;
+        params.height = 400;
         params.width = 550;
         params.y = -10;
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setAttributes(params);
-
     }
 }
 
