@@ -8,24 +8,16 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.raphael.tcc.Managers.BatteryManager;
-import com.example.raphael.tcc.Managers.BluetoothManager;
-import com.example.raphael.tcc.Managers.CpuManager;
-import com.example.raphael.tcc.Managers.GpsManager;
-import com.example.raphael.tcc.Managers.NetworkManager;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
     File file;
-    String teste="myfile";
+   // String teste="myfile";
     StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
     private BroadcastReceiver receiver;
-
+    private Teste teste = new Teste();
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

@@ -1,7 +1,8 @@
 package com.example.raphael.tcc;
 
-import android.content.BroadcastReceiver;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -14,8 +15,9 @@ import java.util.Calendar;
 public class FeedbackButton{
     private WindowManager windowManager;
     private ImageView floatingButton;
+    private String CUSTOM_INTENT="com.example.raphael.tcc.CreateMenuWindow";
 
-    public void createFeedBackButton(Context context){
+    public void createFeedBackButton(final Context context){
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         floatingButton = new ImageView(context);
         floatingButton.setImageResource(R.mipmap.ic_cross_symbol);
@@ -48,9 +50,17 @@ public class FeedbackButton{
                         break;
                     case MotionEvent.ACTION_UP:
                         if(Calendar.getInstance().getTimeInMillis() - startClickTime < MAX_CLICK_DURATION) {
-                            System.out.println("ok");
-                            //Criar uma caixa de mensagem aqui. Chamar um objeto/metodo
-                            //Enviar uma intent? Chamar por serviço?
+                            Intent i = new Intent(context,Teste.class);
+                            i.setAction(CUSTOM_INTENT);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(i);
+                            /*AlertDialog alertDialog = new AlertDialog.Builder(context)
+                                    .setTitle("Title")
+                                    .setMessage("Are you sure?")
+                                    .create();
+
+                            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                            alertDialog.show();*/
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -68,4 +78,5 @@ public class FeedbackButton{
             windowManager.removeView(floatingButton);
         }
     }
+
 }

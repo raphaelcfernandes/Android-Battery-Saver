@@ -25,10 +25,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".Teste"
+            android:theme="@android:style/Theme.Dialog">
+        </activity>
         <service android:name=".BackgroundService"/>
 
         <intent-filter>
             <action android:name="com.example.raphael.tcc"/>
+            <action android:name="com.example.raphael.tcc.CreateMenuWindow"/>
         </intent-filter>
 
     </application>

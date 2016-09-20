@@ -1,6 +1,8 @@
 package com.example.raphael.tcc;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.widget.Toast;
@@ -44,8 +46,12 @@ public class BackgroundService extends Service {
         },1,2,SECONDS);
         return START_STICKY;
     }
-
-
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Recebi broadCast, iniciar activity que contem campo para usuario
+        }
+    };
     @Override
     public void onCreate(){
         super.onCreate();
