@@ -26,6 +26,7 @@
         </activity>
 
         <activity android:name=".Teste"
+            android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Dialog">
         </activity>
         <service android:name=".BackgroundService"/>

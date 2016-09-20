@@ -54,13 +54,6 @@ public class FeedbackButton{
                             i.setAction(CUSTOM_INTENT);
                             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i);
-                            /*AlertDialog alertDialog = new AlertDialog.Builder(context)
-                                    .setTitle("Title")
-                                    .setMessage("Are you sure?")
-                                    .create();
-
-                            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                            alertDialog.show();*/
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
