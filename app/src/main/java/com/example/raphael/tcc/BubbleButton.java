@@ -1,6 +1,5 @@
 package com.example.raphael.tcc;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -12,7 +11,7 @@ import android.widget.ImageView;
 
 import java.util.Calendar;
 
-public class FeedbackButton{
+public class BubbleButton {
     private WindowManager windowManager;
     private ImageView floatingButton;
     private String CUSTOM_INTENT="com.example.raphael.tcc.CreateMenuWindow";
@@ -50,7 +49,7 @@ public class FeedbackButton{
                         break;
                     case MotionEvent.ACTION_UP:
                         if(Calendar.getInstance().getTimeInMillis() - startClickTime < MAX_CLICK_DURATION) {
-                            Intent i = new Intent(context,Teste.class);
+                            Intent i = new Intent(context,FeedBackPopUpWindow.class);
                             i.setAction(CUSTOM_INTENT);
                             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i);

@@ -4,10 +4,44 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:gravity="right"
-    android:layout_height="match_parent">
-    <Button
-        android:text="Done"
-        android:id="@+id/btnDone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></Button>
+    android:layout_height="wrap_content"
+    android:weightSum="1">
+
+    <TextView
+        android:text="Adjust Brightness"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/adjustBrightness"
+        android:layout_gravity="center"
+        android:textAlignment="center" />
+    <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBarBrightness"
+        style="@style/Widget.AppCompat.SeekBar"
+        android:max="100"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="Power Up Smartphone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/powerUpCPU"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="Up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button3"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="50dp" />
+    </RelativeLayout>
+
 </LinearLayout>

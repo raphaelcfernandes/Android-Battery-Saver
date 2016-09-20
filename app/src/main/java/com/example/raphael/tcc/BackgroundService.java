@@ -22,7 +22,7 @@ public class BackgroundService extends Service {
     public static final String CUSTOM_INTENT="com.example.raphael.tcc";
     private BrightnessManager brightnessManager = new BrightnessManager();
     private AppManager appManager = new AppManager();
-    private FeedbackButton feedbackButton = new FeedbackButton();
+    private BubbleButton bubbleButton = new BubbleButton();
     String s;
     @Nullable
     @Override
@@ -55,13 +55,13 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-        feedbackButton.createFeedBackButton(getApplicationContext());
+        bubbleButton.createFeedBackButton(getApplicationContext());
    }
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
         stopSelf();
-        feedbackButton.removeView();
+        bubbleButton.removeView();
     }
 }

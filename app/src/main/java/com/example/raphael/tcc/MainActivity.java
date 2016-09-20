@@ -13,11 +13,11 @@ import java.io.FileOutputStream;
 
 public class MainActivity extends Activity {
     File file;
-   // String teste="myfile";
+   // String feedBackPopUpWindow="myfile";
     StringBuilder teste3 = new StringBuilder();
     FileOutputStream outputStream;
     private BroadcastReceiver receiver;
-    private Teste teste = new Teste();
+    private FeedBackPopUpWindow feedBackPopUpWindow = new FeedBackPopUpWindow();
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -59,9 +59,9 @@ public class MainActivity extends Activity {
         /*teste3.append("\nGPS STATUS: " + manager.getStatusGps(this.getApplicationContext())
                 + "\nPorcentagem BATERIA: " + b1.getBatteryStatus() + "%\nBluetooth: " + blueT.getBluetoothStatus()
                 + "\nNetwork utilizada: " + get_network() + "\nMemoria livre: " + memoryAvailable() + " Mbs");*/
-        /*file = new File(this.getApplicationContext().getFilesDir(), teste);
+        /*file = new File(this.getApplicationContext().getFilesDir(), feedBackPopUpWindow);
         try {
-            outputStream = openFileOutput(teste, Context.MODE_PRIVATE);
+            outputStream = openFileOutput(feedBackPopUpWindow, Context.MODE_PRIVATE);
             outputStream.write(teste3.toString().getBytes());
             outputStream.close();
         } catch (FileNotFoundException e) {

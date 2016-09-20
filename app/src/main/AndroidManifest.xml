@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Teste"
+        <activity android:name=".FeedBackPopUpWindow"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Holo.Dialog">
         </activity>

@@ -26,4 +26,5 @@ dependencies {
     compile 'org.jetbrains:annotations-java5:15.0'
     compile 'org.jetbrains:annotations-java5:15.0'
     compile 'org.jetbrains:annotations-java5:15.0'
+    compile 'org.adw.library:discrete-seekbar:1.0.1'
 }
