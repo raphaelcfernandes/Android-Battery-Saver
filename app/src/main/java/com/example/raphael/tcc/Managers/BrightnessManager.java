@@ -12,18 +12,18 @@ import java.io.IOException;
 public class BrightnessManager {
     //Files can be found at /sys/class/leds/lcd-backlight/
     private ReadFile readFile = new ReadFile();
-    public String getScreenBrightnessLevel(){
+    public int getScreenBrightnessLevel(){
         String s = null;
         try {
             s = readFile.read("/sys/class/leds/lcd-backlight/brightness");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return s;
+        return Integer.parseInt(s);
     }
     public boolean setBrightnessLevel(int level){
         try {
-            Runtime.getRuntime().exec(new String[]{"su", "-c"});
+            //Runtime.getRuntime().exec(new String[]{"su", "-c"});
             Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
             return true;
         } catch (IOException e) {

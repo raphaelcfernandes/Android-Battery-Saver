@@ -41,7 +41,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/button3"
             android:layout_marginLeft="100dp"
-            android:layout_marginTop="50dp" />
+            android:layout_marginTop="50dp"
+            />
     </RelativeLayout>
 
 </LinearLayout>

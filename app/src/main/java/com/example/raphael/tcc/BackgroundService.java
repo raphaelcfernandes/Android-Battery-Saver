@@ -36,7 +36,6 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 s=appManager.getAppRunningForeground();
-                System.out.println(s);
                 if(s.equals("com.android.vending")){
                     Intent intent = new Intent(CUSTOM_INTENT);
                     sendBroadcast(intent);

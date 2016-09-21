@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.example.raphael.tcc.Managers.BrightnessManager;
+
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
 
@@ -13,16 +15,18 @@ import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 public class FeedBackPopUpWindow extends Activity {
     private WindowManager windowManager;
     DiscreteSeekBar seekBar;
+    BrightnessManager brightnessManager = new BrightnessManager();
     @Override
     public void onCreate(Bundle savedInstancedBundle){
         super.onCreate(savedInstancedBundle);
         setContentView(R.layout.custom_dialog);
         seekBar = (DiscreteSeekBar) findViewById(R.id.seekBarBrightness);
         seekBar.setMin(0);
-        seekBar.setMax(100);
+        seekBar.setProgress((brightnessManager.getScreenBrightnessLevel()*100)/255);
+        seekBar.setMax(100);//Percentage
 
         seekBar.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
-            int onProgressChanged =0;
+            int onProgressChanged=0;
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
                 onProgressChanged = value;
@@ -35,7 +39,6 @@ public class FeedBackPopUpWindow extends Activity {
 
             @Override
             public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
-
             }
         });
         WindowManager.LayoutParams params = getWindow().getAttributes();
@@ -47,6 +50,10 @@ public class FeedBackPopUpWindow extends Activity {
     }
     public void onResume(Bundle savedInstanceBundle){
         super.onResume();
+    }
+    public void onDestroy(){
+        super.onDestroy();
+        brightnessManager.setBrightnessLevel((seekBar.getProgress()*255)/100);
     }
 }
 
