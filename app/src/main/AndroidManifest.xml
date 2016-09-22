@@ -29,7 +29,7 @@
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Holo.Dialog">
         </activity>
-        <service android:name=".BackgroundService"/>
+        <service android:name=".BackgroundServices.BackgroundService"/>
 
         <intent-filter>
             <action android:name="com.example.raphael.tcc"/>

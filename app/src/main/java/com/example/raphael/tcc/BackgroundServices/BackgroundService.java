@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.BackgroundServices;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.example.raphael.tcc.BubbleButton;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.Managers.BrightnessManager;
 
@@ -31,6 +32,7 @@ public class BackgroundService extends Service {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent,flags,startId);
         Toast.makeText(this,"Service Started", Toast.LENGTH_LONG).show();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override

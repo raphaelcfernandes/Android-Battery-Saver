@@ -2,7 +2,9 @@ package com.example.raphael.tcc;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import com.example.raphael.tcc.Managers.BrightnessManager;
 
@@ -13,14 +15,16 @@ import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
  * Created by rapha on 18-Sep-16.
  */
 public class FeedBackPopUpWindow extends Activity {
-    private WindowManager windowManager;
+    private boolean isClicked=false;
     DiscreteSeekBar seekBar;
+    Button button ;
     BrightnessManager brightnessManager = new BrightnessManager();
     @Override
     public void onCreate(Bundle savedInstancedBundle){
         super.onCreate(savedInstancedBundle);
         setContentView(R.layout.custom_dialog);
         seekBar = (DiscreteSeekBar) findViewById(R.id.seekBarBrightness);
+        button = (Button)findViewById(R.id.upButton);
         seekBar.setMin(0);
         seekBar.setProgress((brightnessManager.getScreenBrightnessLevel()*100)/255);
         seekBar.setMax(100);//Percentage
@@ -41,6 +45,12 @@ public class FeedBackPopUpWindow extends Activity {
             public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
             }
         });
+        button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                isClicked=true;
+            }
+        });
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.x = -20;
         params.height = 500;
@@ -48,11 +58,13 @@ public class FeedBackPopUpWindow extends Activity {
         params.y = -10;
         this.getWindow().setAttributes(params);
     }
-    public void onResume(Bundle savedInstanceBundle){
+    public void onResume(){
         super.onResume();
     }
     public void onDestroy(){
         super.onDestroy();
+        //Create Intent and send to BackgroundService -> ButtonClicked + Brightness Level
+        System.out.println(isClicked);
         brightnessManager.setBrightnessLevel((seekBar.getProgress()*255)/100);
     }
 }

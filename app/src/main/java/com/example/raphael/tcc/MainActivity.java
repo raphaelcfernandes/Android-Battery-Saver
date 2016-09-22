@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 
+import com.example.raphael.tcc.BackgroundServices.BackgroundService;
+
 import java.io.File;
 import java.io.FileOutputStream;
 
