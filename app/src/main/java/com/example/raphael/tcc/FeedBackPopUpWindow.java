@@ -36,6 +36,7 @@ public class FeedBackPopUpWindow extends Activity {
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
                 onProgressChanged = value;
+                isProgressBarMoved=true;
             }
 
             @Override
