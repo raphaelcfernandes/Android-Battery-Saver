@@ -1,6 +1,7 @@
 package com.example.raphael.tcc;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,6 +17,7 @@ import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
  */
 public class FeedBackPopUpWindow extends Activity {
     private boolean isClicked=false;
+    private boolean isProgressBarMoved=false;
     DiscreteSeekBar seekBar;
     Button button ;
     BrightnessManager brightnessManager = new BrightnessManager();
@@ -63,9 +65,14 @@ public class FeedBackPopUpWindow extends Activity {
     }
     public void onDestroy(){
         super.onDestroy();
-        //Create Intent and send to BackgroundService -> ButtonClicked + Brightness Level
+        if(isProgressBarMoved==true)
+            brightnessManager.setBrightnessLevel((seekBar.getProgress()*255)/100);
+        //Create Intent and send to BackgroundService -> ButtonClicked
         System.out.println(isClicked);
-        brightnessManager.setBrightnessLevel((seekBar.getProgress()*255)/100);
+        if(isClicked==true) {
+            Intent i = new Intent("com.example.raphael.tcc.REQUESTED_MORE_CPU");
+            sendBroadcast(i);
+        }
     }
 }
 
