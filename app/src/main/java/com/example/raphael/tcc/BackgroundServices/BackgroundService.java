@@ -5,13 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.BubbleButton;
 import com.example.raphael.tcc.Managers.AppManager;
-import com.example.raphael.tcc.Managers.BrightnessManager;
 import com.example.raphael.tcc.ReadWriteFile;
 
 import org.jetbrains.annotations.Nullable;
@@ -23,9 +21,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    public static final String CUSTOM_INTENT="com.example.raphael.tcc.REQUESTED_MORE_CPU";
     private ReadWriteFile readWriteFile = new ReadWriteFile();
-    private BrightnessManager brightnessManager = new BrightnessManager();
     private AppManager appManager = new AppManager();
     private BubbleButton bubbleButton = new BubbleButton();
     String s;
@@ -54,7 +50,7 @@ public class BackgroundService extends Service {
         BroadcastReceiver buttonClicked = new BroadcastReceiver() {
             @Override
             public void onReceive(Context arg0, Intent arg1) {
-                readWriteFile.createFile(arg0,"Apertou");
+                readWriteFile.createFile(arg0);
             }
         };
         registerReceiver(buttonClicked, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
