@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.BubbleButton;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
+import com.example.raphael.tcc.UsageStatus;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -33,12 +35,14 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent,flags,startId);
-
         Toast.makeText(this,"Service Started", Toast.LENGTH_LONG).show();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                s=appManager.getAppRunningForeground();
+                s=UsageStatus.printCurrentUsageStatus(BackgroundService.this);
+                System.out.println(s);
+                if(s.equals("com.android.vending"))
+                    bubbleButton.removeView();
             }
         },1,2,SECONDS);
         return START_STICKY;
