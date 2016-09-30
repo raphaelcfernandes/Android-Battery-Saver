@@ -6,13 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.BubbleButton;
-import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
-import com.example.raphael.tcc.UsageStatus;
+import com.example.raphael.tcc.Managers.UsageStatus;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -24,8 +22,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ReadWriteFile readWriteFile = new ReadWriteFile();
-    private AppManager appManager = new AppManager();
     private BubbleButton bubbleButton = new BubbleButton();
+    private UsageStatus usageStatus = new UsageStatus();
     String s;
     @Nullable
     @Override
@@ -39,7 +37,7 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                s=UsageStatus.printCurrentUsageStatus(BackgroundService.this);
+                s=usageStatus.getAppRunningOnForeground(BackgroundService.this);
                 System.out.println(s);
                 if(s.equals("com.android.vending"))
                     bubbleButton.removeView();

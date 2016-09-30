@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.Managers;
 
 /**
  * Created by rapha on 28-Sep-16.
@@ -6,12 +6,10 @@ package com.example.raphael.tcc;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,12 +31,12 @@ public class UsageStatus {
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("M-d-yyyy HH:mm:ss");
 
-    public static String printCurrentUsageStatus(Context context) {
+    public String getAppRunningOnForeground(Context context) {
         return (printUsageStats(getUsageStatsList(context)).get(0));
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static ArrayList<String> printUsageStats(List<UsageStats> usageStatsList) {
+    private ArrayList<String> printUsageStats(List<UsageStats> usageStatsList) {
         HashMap<String, Integer> lastApp = new HashMap<String, Integer>();
         for (UsageStats u : usageStatsList) {
             lastApp.put(u.getPackageName(), (int) u.getLastTimeStamp());
@@ -55,7 +53,7 @@ public class UsageStatus {
 
     // To check the USAGE_STATS_SERVICE permission
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static List<UsageStats> getUsageStatsList(Context context) {
+    public List<UsageStats> getUsageStatsList(Context context) {
         UsageStatsManager usm = getUsageStatsManager(context);
         Calendar calendar = Calendar.getInstance();
         long endTime = calendar.getTimeInMillis();
@@ -67,7 +65,7 @@ public class UsageStatus {
     }
 
     // Sort the map in the ascending order of the timeStamp
-    private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap) {
+    private Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap) {
         List<Map.Entry<String, Integer>> list = new LinkedList<>(unsortMap.entrySet());
 
         // Sorting the list based on values
@@ -88,7 +86,7 @@ public class UsageStatus {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @SuppressWarnings("ResourceType")
-    private static UsageStatsManager getUsageStatsManager(Context context) {
+    private UsageStatsManager getUsageStatsManager(Context context) {
         UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         return usm;
     }
