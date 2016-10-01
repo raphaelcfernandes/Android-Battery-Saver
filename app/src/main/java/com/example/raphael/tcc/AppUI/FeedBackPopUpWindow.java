@@ -1,4 +1,4 @@
-package com.example.raphael.tcc;
+package com.example.raphael.tcc.AppUI;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.example.raphael.tcc.Managers.BrightnessManager;
+import com.example.raphael.tcc.R;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
