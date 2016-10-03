@@ -20,7 +20,7 @@ public class ReadWriteFile{
         reader.close();
         return output.toString();
     }
-    public void createFile(Context context){
+    public static void createFile(Context context){
         String fileName = "MyFile";
         String content = "O botao foi apertado e eu fui chamado!";
         try {

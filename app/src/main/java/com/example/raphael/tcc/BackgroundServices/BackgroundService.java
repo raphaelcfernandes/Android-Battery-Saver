@@ -21,7 +21,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private ReadWriteFile readWriteFile = new ReadWriteFile();
     private BubbleButton bubbleButton = new BubbleButton();
     private UsageStatus usageStatus = new UsageStatus();
     String s;
@@ -52,7 +51,7 @@ public class BackgroundService extends Service {
         BroadcastReceiver buttonClicked = new BroadcastReceiver() {
             @Override
             public void onReceive(Context arg0, Intent arg1) {
-                readWriteFile.createFile(arg0);
+                ReadWriteFile.createFile(arg0);
             }
         };
         registerReceiver(buttonClicked, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));

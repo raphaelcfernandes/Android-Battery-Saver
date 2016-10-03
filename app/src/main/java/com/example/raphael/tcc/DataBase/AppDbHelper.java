@@ -8,9 +8,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by rapha on 30-Sep-16.
  */
 
-public class AppReaderDbHelper extends SQLiteOpenHelper{
-    public AppReaderDbHelper(Context context) {
-        super(context, DBContract.DATABASE_NAME, null, DBContract.DATABASE_VERSION);
+public class AppDbHelper extends SQLiteOpenHelper{
+
+    public static final  int    DATABASE_VERSION   = 1;
+    public static final  String DATABASE_NAME      = "APP_DATABASE.db";
+    public AppDbHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     // Method is called during creation of the database

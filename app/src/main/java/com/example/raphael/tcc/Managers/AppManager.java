@@ -9,7 +9,6 @@ import java.io.IOException;
  * Created by rapha on 17-Sep-16.
  */
 public class AppManager {
-    private ReadWriteFile readWriteFile = new ReadWriteFile();
     public String getAppRunningForeground(){
         int pid;
         File[] files = new File("/proc").listFiles();
@@ -20,7 +19,7 @@ public class AppManager {
                 continue;
             pid = Integer.parseInt(file.getName());
             try {
-                String cgroup = readWriteFile.read(String.format("/proc/%d/cgroup", pid));
+                String cgroup = ReadWriteFile.read(String.format("/proc/%d/cgroup", pid));
                 String[] lines = cgroup.split("\n");
                 if (lines.length != 2)
                     continue;
@@ -28,7 +27,7 @@ public class AppManager {
                 String cpuaccctSubsystem = lines[1];
                 if (!cpuaccctSubsystem.endsWith(Integer.toString(pid)) || cpuSubsystem.endsWith("bg_non_interactive"))
                     continue;
-                String cmdline = readWriteFile.read(String.format("/proc/%d/cmdline", pid));
+                String cmdline = ReadWriteFile.read(String.format("/proc/%d/cmdline", pid));
                 if (cmdline.contains("com.android.systemui")) {
                     continue;
                 }
@@ -37,12 +36,12 @@ public class AppManager {
                     continue;
                 File oomScoreAdj = new File(String.format("/proc/%d/oom_score_adj", pid));
                 if (oomScoreAdj.canRead()) {
-                    int oomAdj = Integer.parseInt(readWriteFile.read(oomScoreAdj.getAbsolutePath()));
+                    int oomAdj = Integer.parseInt(ReadWriteFile.read(oomScoreAdj.getAbsolutePath()));
                     if (oomAdj != 0) {
                         continue;
                     }
                 }
-                int oomscore = Integer.parseInt(readWriteFile.read(String.format("/proc/%d/oom_score", pid)));
+                int oomscore = Integer.parseInt(ReadWriteFile.read(String.format("/proc/%d/oom_score", pid)));
                 if (oomscore < lowestOomScore) {
                     lowestOomScore = oomscore;
                     foregroundProcess = cmdline.replaceAll("\\p{Cntrl}", "");

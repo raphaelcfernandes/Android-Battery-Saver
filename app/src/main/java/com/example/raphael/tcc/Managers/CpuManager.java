@@ -10,20 +10,19 @@ import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
 public class CpuManager {
-    private int numberOfCores;
+    public static int numberOfCores;
     private String pathCPU = "cat /sys/devices/system/cpu/cpu";
 
     public CpuManager(){
         if(Build.VERSION.SDK_INT>=17){
-            this.numberOfCores = Runtime.getRuntime().availableProcessors();
+            numberOfCores = Runtime.getRuntime().availableProcessors();
         }
         else {
-            int i = new File("/sys/devices/system/cpu/").listFiles(new FileFilter() {
+            numberOfCores = new File("/sys/devices/system/cpu/").listFiles(new FileFilter() {
                 public boolean accept(File params){
                     return Pattern.matches("cpu[0-9]", params.getName());
                 }
             }).length;
-            this.numberOfCores = i;
         }
     }
 
@@ -42,7 +41,7 @@ public class CpuManager {
         String p= null;
         path.append("cat /sys/devices/system/cpu/cpu" + coreNumber + "/cpufreq/cpu_utilization");
         try {
-             p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
+            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,9 +72,7 @@ public class CpuManager {
         return p;
     }//ok
 
-    public int getNumberOfCores() {
-        return this.numberOfCores;
-    }//ok
+
 
     public boolean isCoreOnline(int coreNumber){
         StringBuilder path = new StringBuilder();

@@ -11,11 +11,10 @@ import java.io.IOException;
  */
 public class BrightnessManager {
     //Files can be found at /sys/class/leds/lcd-backlight/
-    private ReadWriteFile readWriteFile = new ReadWriteFile();
     public int getScreenBrightnessLevel(){
         String s = null;
         try {
-            s = readWriteFile.read("/sys/class/leds/lcd-backlight/brightness");
+            s = ReadWriteFile.read("/sys/class/leds/lcd-backlight/brightness");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -23,21 +22,11 @@ public class BrightnessManager {
     }
     public boolean setBrightnessLevel(int level){
         try {
-            //Runtime.getRuntime().exec(new String[]{"su", "-c"});
             Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
             return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
-    }
-    private static String read(String path) throws IOException {
-        StringBuilder output = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        output.append(reader.readLine());
-        for (String line = reader.readLine(); line != null; line = reader.readLine())
-            output.append('\n').append(line);
-        reader.close();
-        return output.toString();
     }
 }
