@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
 public class CpuManager {
-    public static int numberOfCores;
+    private int numberOfCores;
     private String pathCPU = "cat /sys/devices/system/cpu/cpu";
 
     public CpuManager(){
@@ -24,6 +24,9 @@ public class CpuManager {
                 }
             }).length;
         }
+    }
+    public int getNumberOfCores(){
+        return this.numberOfCores;
     }
 
     public void setProcessesRunning() {
