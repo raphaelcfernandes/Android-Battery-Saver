@@ -1,19 +1,21 @@
 package com.example.raphael.tcc.AppUI;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
-import com.example.raphael.tcc.DataBase.DBContract;
+import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.R;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     AppDbHelper appDbHelper = new AppDbHelper(MainActivity.this);
+    CpuManager cpuManager = new CpuManager();
+    ArrayList<String> arrayList = new ArrayList<>();
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -22,7 +24,14 @@ public class MainActivity extends Activity {
             startActivity(intent);
         }
         startService(new Intent(getBaseContext(),BackgroundService.class));*/
-       appDbHelper.insertAppConfiguration("TESTE",150,153,1500,132,15232);
+        appDbHelper.insertAppConfiguration("TESTE",150,153,1500,132,15232);
+        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
+        for(String a : arrayList)
+            System.out.println(a);
+        appDbHelper.updateAppConfiguration("TESTE",1323,1,1,1,1);
+        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
+        for(String a : arrayList)
+            System.out.println(a);
     }
     public void onResume(){
         super.onResume();

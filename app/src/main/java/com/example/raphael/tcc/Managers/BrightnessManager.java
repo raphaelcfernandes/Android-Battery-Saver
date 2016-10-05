@@ -2,8 +2,6 @@ package com.example.raphael.tcc.Managers;
 
 import com.example.raphael.tcc.ReadWriteFile;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 
 /**

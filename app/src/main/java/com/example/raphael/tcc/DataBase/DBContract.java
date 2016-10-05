@@ -1,9 +1,7 @@
 package com.example.raphael.tcc.DataBase;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.provider.BaseColumns;
-import android.util.StringBuilderPrinter;
 
 import com.example.raphael.tcc.Managers.CpuManager;
 
