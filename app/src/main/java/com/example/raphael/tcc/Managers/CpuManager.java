@@ -2,6 +2,8 @@ package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
 
+import com.example.raphael.tcc.SearchAlgorithms;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -13,6 +15,8 @@ public class CpuManager {
     private int numberOfCores;
     private String pathCPU = "/sys/devices/system/cpu/cpu";
     private int[][] clockLevels;
+    private int[][] currentClockLevel;
+    private int amountOfValues=0;
     private static boolean isClockLevelsFilled=false;
 
     public CpuManager(){
@@ -29,6 +33,7 @@ public class CpuManager {
         if(isClockLevelsFilled==false) {
             isClockLevelsFilled=true;
             clockLevels = new int[this.numberOfCores][];
+            currentClockLevel = new int[this.numberOfCores][3];
             prepareCores();
         }
     }
@@ -37,8 +42,27 @@ public class CpuManager {
         return this.numberOfCores;
     }
 
-    private void prepareCores(){
+    private void prepareCores() {
+        StringBuilder path = new StringBuilder();
         //Stop the decision of the kernel to control the cpu
+        stopMpDecision();
+        //Turn on cores to read their clock levels
+        for (int i = 0; i < this.numberOfCores; ++i)
+            turnCoreOnOff(i, true);
+        //Set userspace on the cores so one can write the configuration into cpu files
+        for (int i = 0; i < this.numberOfCores; ++i)
+            echoUserSpace(i);
+        //Fill the matrix of clockLevels
+        fillClockLevelMatrix();
+        for (int i = 1; i < this.numberOfCores; ++i)
+            turnCoreOnOff(i, false);
+        //Fill the vector of current cores. ALL but core0 is offline.
+        for (int i = 1; i < this.numberOfCores; i++)
+            this.currentClockLevel[i][0] = 0;
+        initialConfiguration();
+    }
+
+    private void stopMpDecision(){
         String stopMpDecision = "stop mpdecision";
         try{
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
@@ -48,16 +72,6 @@ public class CpuManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Set userspace on the cores so one can write the configuration into cpu files
-        for(int i=0;i<this.numberOfCores;++i)
-            echoUserSpace(i);
-        //Turn on cores to read their clock levels
-        for(int i=0;i<this.numberOfCores;++i)
-            turnCoreOnOff(i,true);
-        //Fill the matrix of clockLevels
-        fillClockLevelMatrix();
-        for(int i=1;i<this.numberOfCores;++i)
-            turnCoreOnOff(i,false);
     }
 
     private void echoUserSpace(int core){
@@ -111,18 +125,34 @@ public class CpuManager {
         for(int i=0;i<this.numberOfCores;++i){
             try {
                 line = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_available_frequencies"));
-                System.out.println(line);
                 levels = line.split("[ \t]");
-                this.clockLevels[i]=new int[levels.length+1];
-                for(x = 0; x < levels.length; x++) {
-                    clockLevels[i][x] = Integer.valueOf(levels[x]);
-                }
-                if(i>0){
-                    clockLevels[i][x]=0;//Only main core online
-                }
+                this.clockLevels[i]=new int[levels.length];
+                this.currentClockLevel[i][1]=levels.length;
+                this.amountOfValues+=levels.length;
+                if(i==0)
+                    this.currentClockLevel[i][2]=1;
+                else
+                    this.currentClockLevel[i][2]=0;
+                for(x = 0; x < levels.length; x++)
+                    this.clockLevels[i][x] = Integer.valueOf(levels[x]);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void initialConfiguration(){
+        StringBuilder path = new StringBuilder();
+        this.currentClockLevel[0][0]=this.clockLevels[0][(clockLevels[0].length)/2];
+        try {
+            path.setLength(0);
+            path.append(String.format("echo " + this.clockLevels[0][(clockLevels[0].length)/2] + " > " + pathCPU + "0/cpufreq/scaling_setspeed"));
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
+            proc.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -138,47 +168,29 @@ public class CpuManager {
         return p;
     }//ok
 
-    public String getGovernorOfCore(int coreNumber){//ok
-        String p=null;
-        StringBuilder path = new StringBuilder();
-        path.append(pathCPU + coreNumber + "/cpufreq/scaling_governor");
-        try {
-            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return p;
-    }//ok
-
-    public String getSpeedOfCore(int coreNumber) {//ok
-        StringBuilder path = new StringBuilder();
-        path.append("cat /sys/devices/system/cpu/cpu" + coreNumber + "/cpufreq/scaling_cur_freq");
-        String p = null;
-        try {
-            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return p;
+    public int getSpeedOfCore(int coreNumber) {//ok
+        return currentClockLevel[coreNumber][0];
     }//ok
 
     public boolean isCoreOnline(int coreNumber){
-        StringBuilder path = new StringBuilder();
-        path.append(pathCPU + coreNumber + "/online");
-        String p = null;
-        int result=0;
-        try {
-            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
-            result = Character.getNumericValue(p.charAt(0));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(result==1)
+        if(currentClockLevel[coreNumber][0]==1)
             return true;
         else
             return false;
     }
 
+    public int getSumNumberCore(){
+        return (calculation()*100)/48;
+    }
+    private int calculation(){
+        int sum=0;
+        for(int i=0;i<this.numberOfCores && this.currentClockLevel[i][2]==1;++i)
+            sum += SearchAlgorithms.binarySearch(this.currentClockLevel[i][0],i,this.clockLevels);
+        return sum;
+    }
+    public int getAmountOfValues(){
+        return this.amountOfValues;
+    }
     private String returnStringFromProcess(Process proc) throws IOException {
         StringBuilder ps = new StringBuilder();
         String s;
