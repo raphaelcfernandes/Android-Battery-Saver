@@ -11,12 +11,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
-public class CpuManager {
-    private int numberOfCores;
+public final class CpuManager {
+    private static int numberOfCores;
     private String pathCPU = "/sys/devices/system/cpu/cpu";
-    private int[][] clockLevels;
-    private int[][] currentClockLevel;
-    private int amountOfValues=0;
+    private static int[][] clockLevels;
+    private static int[][] currentClockLevel;
+    private static int amountOfValues=0;
     private static boolean isClockLevelsFilled=false;
 
     public CpuManager(){
@@ -30,35 +30,34 @@ public class CpuManager {
                 }
             }).length;
         }
-        if(isClockLevelsFilled==false) {
+        if(!isClockLevelsFilled) {
             isClockLevelsFilled=true;
-            clockLevels = new int[this.numberOfCores][];
-            currentClockLevel = new int[this.numberOfCores][3];
+            clockLevels = new int[numberOfCores][];
+            currentClockLevel = new int[numberOfCores][3];
             prepareCores();
         }
     }
 
     public int getNumberOfCores(){
-        return this.numberOfCores;
+        return numberOfCores;
     }
 
     private void prepareCores() {
-        StringBuilder path = new StringBuilder();
         //Stop the decision of the kernel to control the cpu
         stopMpDecision();
         //Turn on cores to read their clock levels
-        for (int i = 0; i < this.numberOfCores; ++i)
+        for (int i = 0; i < numberOfCores; ++i)
             turnCoreOnOff(i, true);
         //Set userspace on the cores so one can write the configuration into cpu files
-        for (int i = 0; i < this.numberOfCores; ++i)
+        for (int i = 0; i < numberOfCores; ++i)
             echoUserSpace(i);
         //Fill the matrix of clockLevels
         fillClockLevelMatrix();
-        for (int i = 1; i < this.numberOfCores; ++i)
+        for (int i = 1; i < numberOfCores; ++i)
             turnCoreOnOff(i, false);
         //Fill the vector of current cores. ALL but core0 is offline.
-        for (int i = 1; i < this.numberOfCores; i++)
-            this.currentClockLevel[i][0] = 0;
+        for (int i = 1; i < numberOfCores; i++)
+            currentClockLevel[i][0] = 0;
         initialConfiguration();
     }
 
@@ -67,9 +66,7 @@ public class CpuManager {
         try{
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -82,9 +79,7 @@ public class CpuManager {
             Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
             proc.waitFor();
             path.setLength(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -122,19 +117,19 @@ public class CpuManager {
         String line;
         String[] levels;
         int x;
-        for(int i=0;i<this.numberOfCores;++i){
+        for(int i = 0; i< numberOfCores; ++i){
             try {
                 line = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_available_frequencies"));
                 levels = line.split("[ \t]");
-                this.clockLevels[i]=new int[levels.length];
-                this.currentClockLevel[i][1]=levels.length;
+                clockLevels[i]=new int[levels.length];
+                currentClockLevel[i][1]=levels.length;
                 this.amountOfValues+=levels.length;
                 if(i==0)
-                    this.currentClockLevel[i][2]=1;
+                    currentClockLevel[i][2]=1;
                 else
-                    this.currentClockLevel[i][2]=0;
+                    currentClockLevel[i][2]=0;
                 for(x = 0; x < levels.length; x++)
-                    this.clockLevels[i][x] = Integer.valueOf(levels[x]);
+                    clockLevels[i][x] = Integer.valueOf(levels[x]);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -143,15 +138,13 @@ public class CpuManager {
 
     private void initialConfiguration(){
         StringBuilder path = new StringBuilder();
-        this.currentClockLevel[0][0]=this.clockLevels[0][(clockLevels[0].length)/2];
+        currentClockLevel[0][0]= clockLevels[0][(clockLevels[0].length)/2];
         try {
             path.setLength(0);
             path.append(String.format("echo " + this.clockLevels[0][(clockLevels[0].length)/2] + " > " + pathCPU + "0/cpufreq/scaling_setspeed"));
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -180,17 +173,15 @@ public class CpuManager {
     }
 
     public int getSumNumberCore(){
-        return (calculation()*100)/48;
+        return (calculation()*100)/amountOfValues;
     }
     private int calculation(){
         int sum=0;
-        for(int i=0;i<this.numberOfCores && this.currentClockLevel[i][2]==1;++i)
-            sum += SearchAlgorithms.binarySearch(this.currentClockLevel[i][0],i,this.clockLevels);
+        for(int i = 0; i< numberOfCores && currentClockLevel[i][2]==1; ++i)
+            sum += SearchAlgorithms.binarySearch(currentClockLevel[i][0],i, clockLevels);
         return sum;
     }
-    public int getAmountOfValues(){
-        return this.amountOfValues;
-    }
+
     private String returnStringFromProcess(Process proc) throws IOException {
         StringBuilder ps = new StringBuilder();
         String s;

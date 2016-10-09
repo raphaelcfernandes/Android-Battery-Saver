@@ -57,7 +57,7 @@ public class FeedBackPopUpWindow extends Activity {
          * SeekBar CPU
          */
         seekBarCpu = (DiscreteSeekBar) findViewById(R.id.seekBarCpu);
-        seekBarCpu.setMax(1);
+        seekBarCpu.setMin(1);
         seekBarCpu.setProgress(cpuManager.getSumNumberCore());
         seekBarCpu.setMax(100);
         seekBarCpu.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {

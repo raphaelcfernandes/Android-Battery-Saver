@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
     AppDbHelper appDbHelper = new AppDbHelper(MainActivity.this);
     AppManager appManager = new AppManager();
     ArrayList<String> arrayList = new ArrayList<>();
+    CpuManager cpuManager = new CpuManager();
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
