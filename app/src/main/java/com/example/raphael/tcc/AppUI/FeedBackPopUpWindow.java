@@ -67,8 +67,12 @@ public class FeedBackPopUpWindow extends Activity {
     }
     public void onDestroy(){
         super.onDestroy();
-        if(isProgressBarMoved==true)
-            brightnessManager.setBrightnessLevel((seekBar.getProgress()*255)/100);
+        if(isProgressBarMoved==true) {
+            if(seekBar.getProgress()==0)
+                brightnessManager.setBrightnessLevel(255/100);
+            else
+                brightnessManager.setBrightnessLevel((seekBar.getProgress() * 255) / 100);
+        }
         //Create Intent and send to BackgroundService -> ButtonClicked
         System.out.println(isClicked);
         if(isClicked==true) {

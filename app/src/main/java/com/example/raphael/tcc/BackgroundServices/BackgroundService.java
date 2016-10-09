@@ -9,7 +9,8 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
-import com.example.raphael.tcc.Managers.UsageStatus;
+import com.example.raphael.tcc.Managers.CpuManager;
+import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
 
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +23,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private BubbleButton bubbleButton = new BubbleButton();
-    private UsageStatus usageStatus = new UsageStatus();
+    private AppManager appManager = new AppManager();
+    private CpuManager cpuManager = new CpuManager();
     String s;
     @Nullable
     @Override
@@ -36,7 +38,7 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                s=usageStatus.getAppRunningOnForeground(BackgroundService.this);
+                s= appManager.getAppRunningOnForeground(BackgroundService.this);
                 System.out.println(s);
                 if(s.equals("com.android.vending"))
                     bubbleButton.removeView();
