@@ -9,12 +9,15 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
+import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -24,8 +27,11 @@ public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private BubbleButton bubbleButton = new BubbleButton();
     private AppManager appManager = new AppManager();
-    private CpuManager cpuManager = new CpuManager();
-    String s;
+    private BroadcastReceiver buttonClicked;
+    private boolean loaded=false;
+    ArrayList<String> arrayList = new ArrayList<>();
+    private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
+    private String actualApp,lastApp;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -38,19 +44,31 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                s= appManager.getAppRunningOnForeground(BackgroundService.this);
-                System.out.println(s);
-                if(s.equals("com.android.vending"))
-                    bubbleButton.removeView();
+                actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
+                if(!loaded){//Retrieve app info from DB
+                    //carregar actualApp
+                    arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
+                    setAppConfiguration(arrayList);
+                    System.out.println("Entrei no primeiro if, estou com o app: "+actualApp+" rodando. Suas configs ja foram carregadas");
+                    loaded=true;
+                    lastApp = actualApp;
+                }
+                if(!actualApp.equals(lastApp)){//Changed apps
+                    //Salvar lastApp
+/*                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
+                    System.out.println("Estou com o app: "+actualApp+" rodando.");*/
+                    loaded=false;
+                }
             }
-        },1,2,SECONDS);
+        },1,1,SECONDS);
         return START_STICKY;
     }
+
     @Override
     public void onCreate(){
         super.onCreate();
         bubbleButton.createFeedBackButton(getApplicationContext());
-        BroadcastReceiver buttonClicked = new BroadcastReceiver() {
+        buttonClicked = new BroadcastReceiver() {
             @Override
             public void onReceive(Context arg0, Intent arg1) {
                 ReadWriteFile.createFile(arg0);
@@ -62,7 +80,27 @@ public class BackgroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
-        stopSelf();
+        unregisterReceiver(buttonClicked);
+        stopService(new Intent(this,BackgroundService.class));
         bubbleButton.removeView();
     }
+
+    private void setAppConfiguration(ArrayList<String> appConfiguration){
+        //Empty ArrayList? No records found -> set to minimum
+        if(appConfiguration.size()==0){
+
+        }
+        //ArrayList with elements -> load them
+        else{
+
+        }
+    }
 }
+/*appDbHelper.insertAppConfiguration("TESTE",150,153,1500,132,15232);
+        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
+        for(String a : arrayList)
+            System.out.println(a);
+        appDbHelper.updateAppConfiguration("TESTE",1323,1,1,1,1);
+        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
+        for(String a : arrayList)
+            System.out.println(a);*/

@@ -34,11 +34,11 @@ public final class CpuManager {
             isClockLevelsFilled=true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
-            prepareCores();
+            //prepareCores();
         }
     }
 
-    public int getNumberOfCores(){
+    public static int getNumberOfCores(){
         return numberOfCores;
     }
 
