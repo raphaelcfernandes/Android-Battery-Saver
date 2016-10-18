@@ -1,9 +1,7 @@
 package com.example.raphael.tcc.AppUI;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -12,7 +10,6 @@ import android.widget.Button;
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.AppManager;
-import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.R;
 
 import java.util.ArrayList;
