@@ -34,7 +34,7 @@ public final class CpuManager {
             isClockLevelsFilled=true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
-            //prepareCores();
+            prepareCores();
         }
     }
 
@@ -87,7 +87,7 @@ public final class CpuManager {
     private void turnCoreOnOff(int core,boolean state){
         //True to turn on Core
         StringBuilder path = new StringBuilder();
-        if(state==true) {
+        if(state==true) {//Turn on
             try {
                 path.setLength(0);
                 path.append(String.format("echo 1 > " + pathCPU + "%d/online", core));
@@ -100,7 +100,7 @@ public final class CpuManager {
             }
         }
         else{
-            try {
+            try {//Turn Off
                 path.setLength(0);
                 path.append(String.format("echo 0 > " + pathCPU + "%d/online", core));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
@@ -123,11 +123,9 @@ public final class CpuManager {
                 levels = line.split("[ \t]");
                 clockLevels[i]=new int[levels.length];
                 currentClockLevel[i][1]=levels.length;
-                this.amountOfValues+=levels.length;
+                amountOfValues+=levels.length;
                 if(i==0)
                     currentClockLevel[i][2]=1;
-                else
-                    currentClockLevel[i][2]=0;
                 for(x = 0; x < levels.length; x++)
                     clockLevels[i][x] = Integer.valueOf(levels[x]);
             } catch (IOException e) {
@@ -141,10 +139,24 @@ public final class CpuManager {
         currentClockLevel[0][0]= clockLevels[0][(clockLevels[0].length)/2];
         try {
             path.setLength(0);
-            path.append(String.format("echo " + this.clockLevels[0][(clockLevels[0].length)/2] + " > " + pathCPU + "0/cpufreq/scaling_setspeed"));
+            path.append(String.format("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed"));
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeSpeedOnCore(int core,int speed){
+        StringBuilder path = new StringBuilder();
+        //Ligar o core caso esteja offline
+        try{
+            path.setLength(0);
+            path.append(String.format("echo %d" + " > "+pathCPU + core + "/cpufreq/scaling_setspeed",speed));
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
+            proc.waitFor();
+            currentClockLevel[core][0]=speed;
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -165,16 +177,14 @@ public final class CpuManager {
         return currentClockLevel[coreNumber][0];
     }//ok
 
-    public boolean isCoreOnline(int coreNumber){
-        if(currentClockLevel[coreNumber][0]==1)
-            return true;
-        else
-            return false;
+    public int isCoreOnline(int coreNumber){
+        return currentClockLevel[coreNumber][0];
     }
 
     public int getSumNumberCore(){
         return (calculation()*100)/amountOfValues;
     }
+
     private int calculation(){
         int sum=0;
         for(int i = 0; i< numberOfCores && currentClockLevel[i][2]==1; ++i)
@@ -191,5 +201,12 @@ public final class CpuManager {
         }
         return ps.toString();
     }//ok
+
+    public void setConfigurationToMinimum(){
+        for(int i=1;i<numberOfCores;i++)
+            turnCoreOnOff(i,false);
+        writeSpeedOnCore(0,clockLevels[0][0]);
+
+    }
 }
 
