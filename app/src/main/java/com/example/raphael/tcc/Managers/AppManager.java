@@ -6,6 +6,7 @@ package com.example.raphael.tcc.Managers;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -21,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by rapha on 28-Sep-16.
@@ -32,7 +35,7 @@ public class AppManager {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("M-d-yyyy HH:mm:ss");
 
     public String getAppRunningOnForeground(Context context) {
-        return (printUsageStats(getUsageStatsList(context)).get(0));
+        return getProcessName(getUsageStatsList(context));
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -59,9 +62,8 @@ public class AppManager {
         long endTime = calendar.getTimeInMillis();
         calendar.add(Calendar.MINUTE, -1);
         long startTime = calendar.getTimeInMillis();
-
-        List<UsageStats> usageStatsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-        return usageStatsList;
+        List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+        return stats;
     }
 
     // Sort the map in the ascending order of the timeStamp
@@ -89,5 +91,19 @@ public class AppManager {
     private UsageStatsManager getUsageStatsManager(Context context) {
         UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         return usm;
+    }
+    private String getProcessName(List<UsageStats> stats) {
+        String foregroundProcess = "";
+            if(stats != null) {
+                SortedMap<Long,UsageStats> mySortedMap = new TreeMap<Long,UsageStats>();
+                for (UsageStats usageStats : stats) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(),usageStats);
+                }
+                if(mySortedMap != null && !mySortedMap.isEmpty()) {
+                    String topPackageName =  mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                    foregroundProcess = topPackageName;
+                }
+            }
+        return foregroundProcess;
     }
 }

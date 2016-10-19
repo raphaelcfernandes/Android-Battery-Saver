@@ -1,10 +1,14 @@
 package com.example.raphael.tcc.BackgroundServices;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -18,6 +22,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -44,8 +52,8 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
-                if(!loaded){//Retrieve app info from DB
+                System.out.println(appManager.getAppRunningOnForeground(BackgroundService.this));
+                /*if(!loaded){//Retrieve app info from DB
                     //carregar actualApp
                     arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
                     setAppConfiguration(arrayList);
@@ -55,10 +63,10 @@ public class BackgroundService extends Service {
                 }
                 if(!actualApp.equals(lastApp)){//Changed apps
                     //Salvar lastApp
-/*                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
-                    System.out.println("Estou com o app: "+actualApp+" rodando.");*/
+*//*                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
+                    System.out.println("Estou com o app: "+actualApp+" rodando.");*//*
                     loaded=false;
-                }
+                }*/
             }
         },1,1,SECONDS);
         return START_STICKY;
@@ -95,6 +103,7 @@ public class BackgroundService extends Service {
 
         }
     }
+
 }
 /*appDbHelper.insertAppConfiguration("TESTE",150,153,1500,132,15232);
         arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
