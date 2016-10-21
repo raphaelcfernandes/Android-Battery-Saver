@@ -33,13 +33,13 @@ public class AppDbHelper extends SQLiteOpenHelper{
         db.execSQL(DBContract.APP_DATABASE.DELETE_TABLE);
         onCreate(db);
     }
-    public boolean insertAppConfiguration(String APP_NAME, int brightnessLevel, int ... arguments){
+    public boolean insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.APP_NAME, APP_NAME);
         contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
-        for(int x=0;x<arguments.length;x++)
-            contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE+x, arguments[x]);
+        for(int x=0;x<cpuSpeed.size();x++)
+            contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE+x, cpuSpeed.get(x));
         db.insert(DBContract.APP_DATABASE.TABLE_NAME, null, contentValues);
         return true;
     }
@@ -56,12 +56,12 @@ public class AppDbHelper extends SQLiteOpenHelper{
         }
         return arrayList;
     }
-    public boolean updateAppConfiguration (String APP_NAME, int brightnessLevel, int ... arguments) {
+    public boolean updateAppConfiguration (String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
-        for(int x=0;x<arguments.length;x++)
-            contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE+x, arguments[x]);
+        for(int x=0;x<cpuSpeed.size();x++)
+            contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE+x, cpuSpeed.get(x));
         db.update(DBContract.APP_DATABASE.TABLE_NAME, contentValues, "APP_NAME = ? ", new String[] { APP_NAME } );
         return true;
     }

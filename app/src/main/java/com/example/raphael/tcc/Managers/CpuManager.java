@@ -35,7 +35,7 @@ public final class CpuManager {
             isClockLevelsFilled=true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
-            //prepareCores();
+            prepareCores();
         }
     }
 
@@ -178,11 +178,11 @@ public final class CpuManager {
         return p;
     }//ok
 
-    public int getSpeedOfCore(int coreNumber) {//ok
+    private int getSpeedOfCore(int coreNumber) {//ok
         return currentClockLevel[coreNumber][0];
     }//ok
 
-    public int isCoreOnline(int coreNumber){
+    private int isCoreOnline(int coreNumber){
         return currentClockLevel[coreNumber][0];
     }
 
@@ -217,6 +217,14 @@ public final class CpuManager {
         for(int i=2,x=0;i<arrayConfiguration.size();i++,x++){
             writeSpeedOnCore(x,Integer.parseInt(arrayConfiguration.get(i)));
         }
+    }
+
+    public ArrayList<Integer> getCoresSpeed(){
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for(int i=0;i<numberOfCores;i++){
+            arrayList.add(i,getSpeedOfCore(i));
+        }
+        return arrayList;
     }
 }
 

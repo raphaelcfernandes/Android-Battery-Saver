@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
                 stopService(new Intent(getBaseContext(),BackgroundService.class));
             }
         });
-        //appDbHelper.insertAppConfiguration("com.example.raphael.tcc",180,384000,0,0,0);
+        //appDbHelper.insertAppConfiguration("com.example.raphael.tcc",180,1026000,0,0,0);
     }
     public void onResume() {
         super.onResume();

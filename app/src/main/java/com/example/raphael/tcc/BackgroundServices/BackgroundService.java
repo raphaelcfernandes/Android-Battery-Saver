@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
+import com.example.raphael.tcc.Managers.BrightnessManager;
 import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
@@ -27,6 +28,7 @@ public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private BubbleButton bubbleButton = new BubbleButton();
     private AppManager appManager = new AppManager();
+    private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
     private BroadcastReceiver buttonClicked;
     private boolean loaded=false;
@@ -50,14 +52,14 @@ public class BackgroundService extends Service {
                     //carregar actualApp
                     arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
                     setAppConfiguration(arrayList);
-                    System.out.println("Entrei no primeiro if, estou com o app: "+actualApp+" rodando. Suas configs ja foram carregadas");
                     loaded=true;
                     lastApp = actualApp;
                 }
                 if(!actualApp.equals(lastApp)){//Changed apps
-                    //Salvar lastApp
-                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
-                    System.out.println("Estou com o app: "+actualApp+" rodando.");
+                    if(arrayList.size()==0)//Salvar
+                        appDbHelper.insertAppConfiguration(actualApp,brightnessManager.getScreenBrightnessLevel(),object.getCoresSpeed());
+                    else//Update
+                        appDbHelper.updateAppConfiguration(actualApp,brightnessManager.getScreenBrightnessLevel(),object.getCoresSpeed());
                     loaded=false;
                 }
             }
@@ -89,11 +91,12 @@ public class BackgroundService extends Service {
     private void setAppConfiguration(ArrayList<String> appConfiguration){
         //Empty ArrayList? No records found -> set to minimum
         if(appConfiguration.size()==0){
-            //object.setConfigurationToMinimum();
+            object.setConfigurationToMinimum();
         }
         //ArrayList with elements -> load them
         else{
             object.adjustConfiguration(appConfiguration);
+            brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
         }
     }
 
