@@ -1,14 +1,10 @@
 package com.example.raphael.tcc.BackgroundServices;
 
-import android.app.ActivityManager;
 import android.app.Service;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -17,15 +13,11 @@ import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.ReadWriteFile;
+import com.example.raphael.tcc.SingletonClasses;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -35,6 +27,7 @@ public class BackgroundService extends Service {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private BubbleButton bubbleButton = new BubbleButton();
     private AppManager appManager = new AppManager();
+    CpuManager object = SingletonClasses.getInstance();
     private BroadcastReceiver buttonClicked;
     private boolean loaded=false;
     ArrayList<String> arrayList = new ArrayList<>();
@@ -52,8 +45,8 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                System.out.println(appManager.getAppRunningOnForeground(BackgroundService.this));
-                /*if(!loaded){//Retrieve app info from DB
+                actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
+                if(!loaded){//Retrieve app info from DB
                     //carregar actualApp
                     arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
                     setAppConfiguration(arrayList);
@@ -63,12 +56,12 @@ public class BackgroundService extends Service {
                 }
                 if(!actualApp.equals(lastApp)){//Changed apps
                     //Salvar lastApp
-*//*                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
-                    System.out.println("Estou com o app: "+actualApp+" rodando.");*//*
+                    System.out.println("Entrei no segundo if, estava com o app: "+lastApp+" rodando. Suas configs ja foram salvas");
+                    System.out.println("Estou com o app: "+actualApp+" rodando.");
                     loaded=false;
-                }*/
+                }
             }
-        },1,1,SECONDS);
+        },1,2,SECONDS);
         return START_STICKY;
     }
 
@@ -96,11 +89,11 @@ public class BackgroundService extends Service {
     private void setAppConfiguration(ArrayList<String> appConfiguration){
         //Empty ArrayList? No records found -> set to minimum
         if(appConfiguration.size()==0){
-
+            //object.setConfigurationToMinimum();
         }
         //ArrayList with elements -> load them
         else{
-
+            object.adjustConfiguration(appConfiguration);
         }
     }
 

@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public final class CpuManager {
@@ -34,7 +35,7 @@ public final class CpuManager {
             isClockLevelsFilled=true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
-            prepareCores();
+            //prepareCores();
         }
     }
 
@@ -57,7 +58,7 @@ public final class CpuManager {
             turnCoreOnOff(i, false);
         //Fill the vector of current cores. ALL but core0 is offline.
         for (int i = 1; i < numberOfCores; i++)
-            currentClockLevel[i][0] = 0;
+            //currentClockLevel[i][0] = 0;
         initialConfiguration();
     }
 
@@ -136,10 +137,10 @@ public final class CpuManager {
 
     private void initialConfiguration(){
         StringBuilder path = new StringBuilder();
-        currentClockLevel[0][0]= clockLevels[0][(clockLevels[0].length)/2];
+        currentClockLevel[0][0]= clockLevels[0][0];
         try {
             path.setLength(0);
-            path.append(String.format("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed"));
+            path.append("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
@@ -150,14 +151,18 @@ public final class CpuManager {
     private void writeSpeedOnCore(int core,int speed){
         StringBuilder path = new StringBuilder();
         //Ligar o core caso esteja offline
-        try{
-            path.setLength(0);
-            path.append(String.format("echo %d" + " > "+pathCPU + core + "/cpufreq/scaling_setspeed",speed));
-            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
-            proc.waitFor();
-            currentClockLevel[core][0]=speed;
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
+        if(speed!=0) {
+            if(currentClockLevel[core][0]==0)
+                turnCoreOnOff(core, true);
+            try {
+                path.setLength(0);
+                path.append(String.format("echo %d" + " > " + pathCPU + core + "/cpufreq/scaling_setspeed", speed));
+                Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
+                proc.waitFor();
+                currentClockLevel[core][0] = speed;
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -206,7 +211,12 @@ public final class CpuManager {
         for(int i=1;i<numberOfCores;i++)
             turnCoreOnOff(i,false);
         writeSpeedOnCore(0,clockLevels[0][0]);
+    }
 
+    public void adjustConfiguration(ArrayList<String> arrayConfiguration){
+        for(int i=2,x=0;i<arrayConfiguration.size();i++,x++){
+            writeSpeedOnCore(x,Integer.parseInt(arrayConfiguration.get(i)));
+        }
     }
 }
 

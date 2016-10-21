@@ -49,6 +49,7 @@ public class AppDbHelper extends SQLiteOpenHelper{
         Cursor res =  db.rawQuery( "SELECT * FROM "+ DBContract.APP_DATABASE.TABLE_NAME +" WHERE "
                 + DBContract.APP_DATABASE.APP_NAME+" LIKE ?", new String[]{AppName});
         if(res.moveToFirst()){
+            arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.APP_NAME)));
             arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS)));
             for(int x=0;x<numberOfCores;x++)
                 arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_CORE+x)));
