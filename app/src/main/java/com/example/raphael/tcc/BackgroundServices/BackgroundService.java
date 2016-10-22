@@ -101,11 +101,3 @@ public class BackgroundService extends Service {
     }
 
 }
-/*appDbHelper.insertAppConfiguration("TESTE",150,153,1500,132,15232);
-        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
-        for(String a : arrayList)
-            System.out.println(a);
-        appDbHelper.updateAppConfiguration("TESTE",1323,1,1,1,1);
-        arrayList = appDbHelper.getAppData(cpuManager.getNumberOfCores(),"TESTE");
-        for(String a : arrayList)
-            System.out.println(a);*/
