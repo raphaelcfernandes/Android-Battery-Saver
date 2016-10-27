@@ -54,12 +54,32 @@ public final class CpuManager {
             echoUserSpace(i);
         //Fill the matrix of clockLevels
         fillClockLevelMatrix();
+        //Set Min and Max Freq based on ClockLevelMatrix
+        adjustMinAndMaxSpeed();
         for (int i = 1; i < numberOfCores; ++i)
             turnCoreOnOff(i, false);
         //Fill the vector of current cores. ALL but core0 is offline.
         for (int i = 1; i < numberOfCores; i++)
-            //currentClockLevel[i][0] = 0;
-        initialConfiguration();
+            currentClockLevel[i][0] = 0;
+        //initialConfiguration();
+    }
+
+    private void adjustMinAndMaxSpeed() {
+        StringBuilder path = new StringBuilder();
+        try {
+            for (int i = 0; i < numberOfCores; i++){
+                path.setLength(0);
+                path.append("echo "+clockLevels[i][clockLevels[i].length-1]+ " > "+pathCPU + i +"/cpufreq/scaling_max_freq");
+                Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+                proc.waitFor();
+                path.setLength(0);
+                path.append("echo "+clockLevels[i][0]+ " > "+pathCPU +  i+ "/cpufreq/scaling_min_freq");
+                proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+                proc.waitFor();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void stopMpDecision(){
@@ -76,7 +96,7 @@ public final class CpuManager {
         StringBuilder path = new StringBuilder();
         try {
             path.setLength(0);
-            path.append(String.format("echo userspace > /sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", core));
+            path.append("echo userspace > "+pathCPU+core+"/cpufreq/scaling_governor");
             Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
             proc.waitFor();
             path.setLength(0);
@@ -103,7 +123,7 @@ public final class CpuManager {
         else{
             try {//Turn Off
                 path.setLength(0);
-                path.append(String.format("echo 0 > " + pathCPU + "%d/online", core));
+                path.append("echo 0 > " + pathCPU + core+"/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
             } catch (IOException e) {
@@ -165,18 +185,6 @@ public final class CpuManager {
             }
         }
     }
-
-    public String getCoreUtilization(int coreNumber){
-        StringBuilder path = new StringBuilder();
-        String p= null;
-        path.append("cat /sys/devices/system/cpu/cpu" + coreNumber + "/cpufreq/cpu_utilization");
-        try {
-            p = returnStringFromProcess(Runtime.getRuntime().exec(path.toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return p;
-    }//ok
 
     private int getSpeedOfCore(int coreNumber) {//ok
         return currentClockLevel[coreNumber][0];
