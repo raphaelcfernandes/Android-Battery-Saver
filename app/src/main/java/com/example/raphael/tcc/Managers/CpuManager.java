@@ -158,7 +158,7 @@ public final class CpuManager {
         currentClockLevel[0][0]= clockLevels[0][0];
         try {
             path.setLength(0);
-            path.append("echo " + clockLevels[0][6] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
+            path.append("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
@@ -170,7 +170,7 @@ public final class CpuManager {
         StringBuilder path = new StringBuilder();
         //Ligar o core caso esteja offline
         if(speed!=0) {
-            if(currentClockLevel[core][0]==0)
+            if(currentClockLevel[core][2]==0)
                 turnCoreOnOff(core, true);
             try {
                 path.setLength(0);
@@ -216,7 +216,7 @@ public final class CpuManager {
     public void setConfigurationToMinimum(){
         for(int i=1;i<numberOfCores;i++)
             turnCoreOnOff(i,false);
-        writeSpeedOnCore(0,clockLevels[0][0]);
+        writeSpeedOnCore(0,clockLevels[0][6]);
     }
 
     public void adjustConfiguration(ArrayList<String> arrayConfiguration){
@@ -236,11 +236,10 @@ public final class CpuManager {
     public void setCpuSpeedFromUserInput(int value){
         //value is percentage
         int converter = (value*(4* 12))/100;
-
-        getArrayListOfSpeedFromUserInput(converter);
+        setArrayListOfSpeedFromUserInput(converter);
     }
 
-    private void getArrayListOfSpeedFromUserInput(int converter) {
+    private void setArrayListOfSpeedFromUserInput(int converter) {
         int i=0;
         ArrayList<Integer> arrayList = new ArrayList<>();
         while(i<numberOfCores){
@@ -265,6 +264,10 @@ public final class CpuManager {
                 writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)-1]);
             else
                 writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)]);
+        }
+        if(i<numberOfCores){
+            for(;i<numberOfCores;i++)
+                turnCoreOnOff(i,false);
         }
     }
 }

@@ -30,6 +30,7 @@ public class BackgroundService extends Service {
     CpuManager object = SingletonClasses.getInstance();
     private BroadcastRcv feedbackButton;
     private boolean loaded=false;
+    public static boolean adjustment=false;
     ArrayList<String> arrayList = new ArrayList<>();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
     private String actualApp,lastApp;
@@ -93,5 +94,7 @@ public class BackgroundService extends Service {
             brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
         }
     }
-
+    public static void setAdjustment(){
+        adjustment=true;
+    }
 }
