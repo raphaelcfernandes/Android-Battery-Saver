@@ -17,7 +17,7 @@ public final class CpuManager {
     private String pathCPU = "/sys/devices/system/cpu/cpu";
     private static int[][] clockLevels;
     private static int[][] currentClockLevel;
-    private static int amountOfValues=0;
+    private static int amountOfValuesPerCore;
     private static boolean isClockLevelsFilled=false;
 
     public CpuManager(){
@@ -114,9 +114,8 @@ public final class CpuManager {
                 path.append(String.format("echo 1 > " + pathCPU + "%d/online", core));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+                currentClockLevel[core][2]=1;
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -126,9 +125,8 @@ public final class CpuManager {
                 path.append("echo 0 > " + pathCPU + core+"/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+                currentClockLevel[core][2]=0;
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -144,7 +142,7 @@ public final class CpuManager {
                 levels = line.split("[ \t]");
                 clockLevels[i]=new int[levels.length];
                 currentClockLevel[i][1]=levels.length;
-                amountOfValues+=levels.length;
+                amountOfValuesPerCore=levels.length;
                 if(i==0)
                     currentClockLevel[i][2]=1;
                 for(x = 0; x < levels.length; x++)
@@ -160,7 +158,7 @@ public final class CpuManager {
         currentClockLevel[0][0]= clockLevels[0][0];
         try {
             path.setLength(0);
-            path.append("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
+            path.append("echo " + clockLevels[0][6] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
@@ -195,7 +193,7 @@ public final class CpuManager {
     }
 
     public int getSumNumberCore(){
-        return (calculation()*100)/amountOfValues;
+        return (calculation()*100)/ amountOfValuesPerCore;
     }
 
     private int calculation(){
@@ -233,6 +231,41 @@ public final class CpuManager {
             arrayList.add(i,getSpeedOfCore(i));
         }
         return arrayList;
+    }
+
+    public void setCpuSpeedFromUserInput(int value){
+        //value is percentage
+        int converter = (value*(4* 12))/100;
+
+        getArrayListOfSpeedFromUserInput(converter);
+    }
+
+    private void getArrayListOfSpeedFromUserInput(int converter) {
+        int i=0;
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        while(i<numberOfCores){
+            if(converter>=amountOfValuesPerCore) {
+                arrayList.add(i,amountOfValuesPerCore);
+            }
+            else if(converter>0&&converter<amountOfValuesPerCore) {
+                arrayList.add(i, converter);
+                break;
+            }
+            else if(converter==0) {
+                arrayList.add(i, 0);
+                break;
+            }
+            else
+                break;
+            i++;
+            converter-=amountOfValuesPerCore;
+        }
+        for(i=0;i<arrayList.size();i++) {
+            if(arrayList.get(i)==12)
+                writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)-1]);
+            else
+                writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)]);
+        }
     }
 }
 

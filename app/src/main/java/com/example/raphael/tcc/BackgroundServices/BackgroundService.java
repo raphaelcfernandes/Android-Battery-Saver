@@ -2,7 +2,6 @@ package com.example.raphael.tcc.BackgroundServices;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
@@ -10,10 +9,9 @@ import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
+import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.Managers.BrightnessManager;
 import com.example.raphael.tcc.Managers.CpuManager;
-import com.example.raphael.tcc.Managers.AppManager;
-import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SingletonClasses;
 
 import org.jetbrains.annotations.Nullable;
@@ -30,11 +28,12 @@ public class BackgroundService extends Service {
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
-    private BroadcastReceiver buttonClicked;
+    private BroadcastRcv feedbackButton;
     private boolean loaded=false;
     ArrayList<String> arrayList = new ArrayList<>();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
     private String actualApp,lastApp;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -71,19 +70,14 @@ public class BackgroundService extends Service {
     public void onCreate(){
         super.onCreate();
         bubbleButton.createFeedBackButton(getApplicationContext());
-        buttonClicked = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context arg0, Intent arg1) {
-                ReadWriteFile.createFile(arg0);
-            }
-        };
-        registerReceiver(buttonClicked, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
+        feedbackButton = new BroadcastRcv();
+        registerReceiver(feedbackButton, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
    }
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
-        unregisterReceiver(buttonClicked);
+        unregisterReceiver(feedbackButton);
         stopService(new Intent(this,BackgroundService.class));
         bubbleButton.removeView();
     }

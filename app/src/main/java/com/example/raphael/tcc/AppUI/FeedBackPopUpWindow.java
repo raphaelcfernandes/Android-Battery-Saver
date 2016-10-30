@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import com.example.raphael.tcc.Managers.BrightnessManager;
 import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.R;
+import com.example.raphael.tcc.SingletonClasses;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
@@ -21,7 +22,8 @@ public class FeedBackPopUpWindow extends Activity {
     DiscreteSeekBar seekBarBrightness;
     DiscreteSeekBar seekBarCpu;
     BrightnessManager brightnessManager = new BrightnessManager();
-    CpuManager cpuManager = new CpuManager();
+    CpuManager object = SingletonClasses.getInstance();
+    private static int cpuBarValue;
     @Override
     public void onCreate(Bundle savedInstancedBundle){
         super.onCreate(savedInstancedBundle);
@@ -58,13 +60,13 @@ public class FeedBackPopUpWindow extends Activity {
          */
         seekBarCpu = (DiscreteSeekBar) findViewById(R.id.seekBarCpu);
         seekBarCpu.setMin(1);
-        seekBarCpu.setProgress(cpuManager.getSumNumberCore());
+        seekBarCpu.setProgress(object.getSumNumberCore());
         seekBarCpu.setMax(100);
         seekBarCpu.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
             int onProgressChanged=0;
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
-                onProgressChanged = value;
+                onProgressChanged = cpuBarValue= value;
                 isProgressBarCpuMoved=true;
             }
 
@@ -90,17 +92,18 @@ public class FeedBackPopUpWindow extends Activity {
     }
     public void onDestroy(){
         super.onDestroy();
-        if(isProgressBarBrightnessMoved==true) {
+        if(isProgressBarBrightnessMoved) {
             if(seekBarBrightness.getProgress()==0)
                 brightnessManager.setBrightnessLevel(255/100);
             else
                 brightnessManager.setBrightnessLevel((seekBarBrightness.getProgress() * 255) / 100);
         }
         //Create Intent and send to BackgroundService -> ButtonClicked
-        /*if(isClicked==true) {
+        if(isProgressBarCpuMoved) {
             Intent i = new Intent("com.example.raphael.tcc.REQUESTED_MORE_CPU");
+            i.putExtra("valorCpuUsuario",cpuBarValue);
             sendBroadcast(i);
-        }*/
+        }
     }
 }
 

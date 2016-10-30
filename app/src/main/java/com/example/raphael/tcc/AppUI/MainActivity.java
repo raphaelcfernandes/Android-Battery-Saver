@@ -14,10 +14,12 @@ import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.R;
 import com.example.raphael.tcc.SingletonClasses;
 
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+
 public class MainActivity extends Activity {
     AppManager appManager = new AppManager();
     AppDbHelper appDbHelper = new AppDbHelper(MainActivity.this);
-    CpuManager object = SingletonClasses.getInstance();
     Button b1,b2;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,8 +53,5 @@ public class MainActivity extends Activity {
     }
     public void onDestroy(){
         super.onDestroy();
-        android.os.Debug.stopMethodTracing();
     }
-
-
 }
