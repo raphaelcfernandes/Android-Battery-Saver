@@ -2,6 +2,7 @@ package com.example.raphael.tcc.BackgroundServices;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
@@ -28,7 +29,6 @@ public class BackgroundService extends Service {
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
-    private BroadcastRcv feedbackButton;
     private boolean loaded=false;
     public static boolean adjustment=false;
     ArrayList<String> arrayList = new ArrayList<>();
@@ -57,9 +57,9 @@ public class BackgroundService extends Service {
                 }
                 if(!actualApp.equals(lastApp)){//Changed apps
                     if(arrayList.size()==0)//Salvar
-                        appDbHelper.insertAppConfiguration(actualApp,brightnessManager.getScreenBrightnessLevel(),object.getCoresSpeed());
+                        appDbHelper.insertAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
                     else//Update
-                        appDbHelper.updateAppConfiguration(actualApp,brightnessManager.getScreenBrightnessLevel(),object.getCoresSpeed());
+                        appDbHelper.updateAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
                     loaded=false;
                 }
             }
@@ -71,14 +71,13 @@ public class BackgroundService extends Service {
     public void onCreate(){
         super.onCreate();
         bubbleButton.createFeedBackButton(getApplicationContext());
-        feedbackButton = new BroadcastRcv();
-        registerReceiver(feedbackButton, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
+        registerReceiver(broadcastRcv, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
    }
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
-        unregisterReceiver(feedbackButton);
+        unregisterReceiver(broadcastRcv);
         stopService(new Intent(this,BackgroundService.class));
         bubbleButton.removeView();
     }
@@ -94,7 +93,16 @@ public class BackgroundService extends Service {
             brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
         }
     }
-    public static void setAdjustment(){
-        adjustment=true;
-    }
+
+    private final BroadcastReceiver broadcastRcv = new BroadcastReceiver (){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            int value;
+            if(action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")){
+                value = intent.getIntExtra("valorCpuUsuario",0);
+                object.setCpuSpeedFromUserInput(value);
+            }
+        }
+    };
 }

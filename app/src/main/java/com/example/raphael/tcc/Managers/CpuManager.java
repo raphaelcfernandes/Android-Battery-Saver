@@ -61,7 +61,6 @@ public final class CpuManager {
         //Fill the vector of current cores. ALL but core0 is offline.
         for (int i = 1; i < numberOfCores; i++)
             currentClockLevel[i][0] = 0;
-        //initialConfiguration();
     }
 
     private void adjustMinAndMaxSpeed() {
@@ -153,19 +152,6 @@ public final class CpuManager {
         }
     }
 
-    private void initialConfiguration(){
-        StringBuilder path = new StringBuilder();
-        currentClockLevel[0][0]= clockLevels[0][0];
-        try {
-            path.setLength(0);
-            path.append("echo " + clockLevels[0][0] + " > " + pathCPU + "0/cpufreq/scaling_setspeed");
-            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
-            proc.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void writeSpeedOnCore(int core,int speed){
         StringBuilder path = new StringBuilder();
         //Ligar o core caso esteja offline
@@ -182,18 +168,20 @@ public final class CpuManager {
                 e.printStackTrace();
             }
         }
+        else
+            turnCoreOnOff(core,false);
     }
 
     private int getSpeedOfCore(int coreNumber) {//ok
         return currentClockLevel[coreNumber][0];
-    }//ok
+    }
 
     private int isCoreOnline(int coreNumber){
-        return currentClockLevel[coreNumber][0];
+        return currentClockLevel[coreNumber][2];
     }
 
     public int getSumNumberCore(){
-        return (calculation()*100)/ amountOfValuesPerCore;
+        return (calculation()*100)/ (amountOfValuesPerCore*numberOfCores);
     }
 
     private int calculation(){
@@ -220,12 +208,13 @@ public final class CpuManager {
     }
 
     public void adjustConfiguration(ArrayList<String> arrayConfiguration){
-        for(int i=2,x=0;i<arrayConfiguration.size();i++,x++){
+        int x,i;
+        for(i=2,x=0;i<arrayConfiguration.size();i++,x++){
             writeSpeedOnCore(x,Integer.parseInt(arrayConfiguration.get(i)));
         }
     }
 
-    public ArrayList<Integer> getCoresSpeed(){
+    public ArrayList<Integer> getArrayListCoresSpeed(){
         ArrayList<Integer> arrayList = new ArrayList<>();
         for(int i=0;i<numberOfCores;i++){
             arrayList.add(i,getSpeedOfCore(i));

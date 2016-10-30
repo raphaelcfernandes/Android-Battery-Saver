@@ -6,22 +6,14 @@ package com.example.raphael.tcc.Managers;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.Build;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -38,22 +30,6 @@ public class AppManager {
         return getProcessName(getUsageStatsList(context));
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private ArrayList<String> printUsageStats(List<UsageStats> usageStatsList) {
-        HashMap<String, Integer> lastApp = new HashMap<String, Integer>();
-        for (UsageStats u : usageStatsList) {
-            lastApp.put(u.getPackageName(), (int) u.getLastTimeStamp());
-        }
-        Map<String, Integer> sortedMapAsc = sortByComparator(lastApp);
-        ArrayList<String> firstApp = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : sortedMapAsc.entrySet()) {
-            String key = entry.getKey();
-            firstApp.add(key);
-        }
-
-        return firstApp;
-    }
-
     // To check the USAGE_STATS_SERVICE permission
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public List<UsageStats> getUsageStatsList(Context context) {
@@ -64,26 +40,6 @@ public class AppManager {
         long startTime = calendar.getTimeInMillis();
         List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
         return stats;
-    }
-
-    // Sort the map in the ascending order of the timeStamp
-    private Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap) {
-        List<Map.Entry<String, Integer>> list = new LinkedList<>(unsortMap.entrySet());
-
-        // Sorting the list based on values
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2) {
-                return o2.getValue().compareTo(o1.getValue());
-            }
-        });
-
-        // Maintaining insertion order with the help of LinkedList
-        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-        return sortedMap;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)

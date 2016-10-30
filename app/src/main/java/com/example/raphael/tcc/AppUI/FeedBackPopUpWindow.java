@@ -66,7 +66,7 @@ public class FeedBackPopUpWindow extends Activity {
             int onProgressChanged=0;
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
-                onProgressChanged = cpuBarValue= value;
+                onProgressChanged = cpuBarValue = value;
                 isProgressBarCpuMoved=true;
             }
 
