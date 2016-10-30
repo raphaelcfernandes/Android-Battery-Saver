@@ -34,6 +34,8 @@ public class AppDbHelper extends SQLiteOpenHelper{
         onCreate(db);
     }
     public boolean insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed){
+        if(CheckIsDataAlreadyInDBorNot(APP_NAME))
+            return false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.APP_NAME, APP_NAME);
@@ -43,10 +45,23 @@ public class AppDbHelper extends SQLiteOpenHelper{
         db.insert(DBContract.APP_DATABASE.TABLE_NAME, null, contentValues);
         return true;
     }
+
+    private boolean CheckIsDataAlreadyInDBorNot(String AppName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor =  db.rawQuery("SELECT * FROM "+ DBContract.APP_DATABASE.TABLE_NAME +" WHERE "
+                + DBContract.APP_DATABASE.APP_NAME+" LIKE ?", new String[]{AppName});
+        if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
     public ArrayList<String> getAppData(int numberOfCores, String AppName){
         ArrayList<String> arrayList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "SELECT * FROM "+ DBContract.APP_DATABASE.TABLE_NAME +" WHERE "
+        Cursor res =  db.rawQuery("SELECT * FROM "+ DBContract.APP_DATABASE.TABLE_NAME +" WHERE "
                 + DBContract.APP_DATABASE.APP_NAME+" LIKE ?", new String[]{AppName});
         if(res.moveToFirst()){
             arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.APP_NAME)));

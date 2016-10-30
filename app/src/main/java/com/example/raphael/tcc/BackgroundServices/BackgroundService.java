@@ -30,10 +30,10 @@ public class BackgroundService extends Service {
     private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
     private boolean loaded=false;
-    public static boolean adjustment=false;
+    private static boolean changeDetector=false;
     ArrayList<String> arrayList = new ArrayList<>();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
-    private String actualApp,lastApp;
+    private String actualApp,lastApp="";
 
     @Nullable
     @Override
@@ -48,19 +48,21 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
+                if(!actualApp.equals(lastApp))
+                    loaded=false;
                 if(!loaded){//Retrieve app info from DB
                     //carregar actualApp
                     arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
+                    if(!actualApp.equals(lastApp) && !lastApp.equals("")){
+                        if(changeDetector)
+                            appDbHelper.updateAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
+                        else
+                            appDbHelper.insertAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
+                    }
                     setAppConfiguration(arrayList);
                     loaded=true;
                     lastApp = actualApp;
-                }
-                if(!actualApp.equals(lastApp)){//Changed apps
-                    if(arrayList.size()==0)//Salvar
-                        appDbHelper.insertAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
-                    else//Update
-                        appDbHelper.updateAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
-                    loaded=false;
+                    changeDetector=false;
                 }
             }
         },1,2,SECONDS);
@@ -102,6 +104,7 @@ public class BackgroundService extends Service {
             if(action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")){
                 value = intent.getIntExtra("valorCpuUsuario",0);
                 object.setCpuSpeedFromUserInput(value);
+                changeDetector=true;
             }
         }
     };
