@@ -34,8 +34,6 @@ public class AppDbHelper extends SQLiteOpenHelper{
         onCreate(db);
     }
     public boolean insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed){
-        if(CheckIsDataAlreadyInDBorNot(APP_NAME))
-            return false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.APP_NAME, APP_NAME);
@@ -72,12 +70,16 @@ public class AppDbHelper extends SQLiteOpenHelper{
         return arrayList;
     }
     public boolean updateAppConfiguration (String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
-        for(int x=0;x<cpuSpeed.size();x++)
-            contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE+x, cpuSpeed.get(x));
-        db.update(DBContract.APP_DATABASE.TABLE_NAME, contentValues, "APP_NAME = ? ", new String[] { APP_NAME } );
+        if(!CheckIsDataAlreadyInDBorNot(APP_NAME))
+            insertAppConfiguration(APP_NAME, brightnessLevel, cpuSpeed);
+        else {
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
+            for (int x = 0; x < cpuSpeed.size(); x++)
+                contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE + x, cpuSpeed.get(x));
+            db.update(DBContract.APP_DATABASE.TABLE_NAME, contentValues, "APP_NAME = ? ", new String[]{APP_NAME});
+        }
         return true;
     }
 }

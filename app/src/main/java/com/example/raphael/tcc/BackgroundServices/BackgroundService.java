@@ -29,8 +29,7 @@ public class BackgroundService extends Service {
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
-    private boolean loaded=false;
-    private static boolean changeDetector=false;
+    private boolean loaded=false,changeDetector=false,firstTimeOnSystem=false;
     ArrayList<String> arrayList = new ArrayList<>();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
     private String actualApp,lastApp="";
@@ -56,7 +55,7 @@ public class BackgroundService extends Service {
                     if(!actualApp.equals(lastApp) && !lastApp.equals("")){
                         if(changeDetector)
                             appDbHelper.updateAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
-                        else
+                        else if(firstTimeOnSystem)
                             appDbHelper.insertAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
                     }
                     setAppConfiguration(arrayList);
@@ -86,13 +85,14 @@ public class BackgroundService extends Service {
 
     private void setAppConfiguration(ArrayList<String> appConfiguration){
         //Empty ArrayList? No records found -> set to minimum
-        if(appConfiguration.size()==0){
-            object.setConfigurationToMinimum();
-        }
-        //ArrayList with elements -> load them
-        else{
-            object.adjustConfiguration(appConfiguration);
+        object.adjustConfiguration(appConfiguration);
+        if(appConfiguration.size()!=0) {
             brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
+            firstTimeOnSystem=false;
+        }
+        else {
+            brightnessManager.setBrightnessLevel(100);
+            firstTimeOnSystem = true;
         }
     }
 

@@ -20,9 +20,10 @@ public class BrightnessManager {
     }
     public boolean setBrightnessLevel(int level){
         try {
-            Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
+            Process proc =Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
+            proc.waitFor();
             return true;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return false;

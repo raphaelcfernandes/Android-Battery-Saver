@@ -47,35 +47,31 @@ public final class CpuManager {
         //Stop the decision of the kernel to control the cpu
         stopMpDecision();
         //Turn on cores to read their clock levels
-        for (int i = 0; i < numberOfCores; ++i)
-            turnCoreOnOff(i, true);
-        //Set userspace on the cores so one can write the configuration into cpu files
-        for (int i = 0; i < numberOfCores; ++i)
+        for (int i = 0; i < numberOfCores; ++i) {
+            if(i!=0)
+                turnCoreOnOff(i, true);
+            //Set userspace on the cores so one can write the configuration into cpu files
             echoUserSpace(i);
-        //Fill the matrix of clockLevels
-        fillClockLevelMatrix();
-        //Set Min and Max Freq based on ClockLevelMatrix
-        adjustMinAndMaxSpeed();
-        for (int i = 1; i < numberOfCores; ++i)
-            turnCoreOnOff(i, false);
-        //Fill the vector of current cores. ALL but core0 is offline.
-        for (int i = 1; i < numberOfCores; i++)
-            currentClockLevel[i][0] = 0;
+            //Fill the matrix of clockLevels
+            fillClockLevelMatrix(i);
+            //Set Min and Max Freq based on ClockLevelMatrix
+            //adjustMinAndMaxSpeed(i);
+            if(i!=0)
+                turnCoreOnOff(i, false);
+        }
     }
 
-    private void adjustMinAndMaxSpeed() {
+    private void adjustMinAndMaxSpeed(int core) {
         StringBuilder path = new StringBuilder();
         try {
-            for (int i = 0; i < numberOfCores; i++){
-                path.setLength(0);
-                path.append("echo "+clockLevels[i][clockLevels[i].length-1]+ " > "+pathCPU + i +"/cpufreq/scaling_max_freq");
-                Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
-                proc.waitFor();
-                path.setLength(0);
-                path.append("echo "+clockLevels[i][0]+ " > "+pathCPU +  i+ "/cpufreq/scaling_min_freq");
-                proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
-                proc.waitFor();
-            }
+            path.setLength(0);
+            path.append("echo "+clockLevels[core][clockLevels[core].length-1]+ " > "+pathCPU + core +"/cpufreq/scaling_max_freq");
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+            proc.waitFor();
+            path.setLength(0);
+            path.append("echo "+clockLevels[core][0]+ " > "+pathCPU +  core+ "/cpufreq/scaling_min_freq");
+            proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+            proc.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -131,24 +127,22 @@ public final class CpuManager {
         }
     }
 
-    private void fillClockLevelMatrix(){
+    private void fillClockLevelMatrix(int core){
         String line;
         String[] levels;
         int x;
-        for(int i = 0; i< numberOfCores; ++i){
-            try {
-                line = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_available_frequencies"));
-                levels = line.split("[ \t]");
-                clockLevels[i]=new int[levels.length];
-                currentClockLevel[i][1]=levels.length;
-                amountOfValuesPerCore=levels.length;
-                if(i==0)
-                    currentClockLevel[i][2]=1;
-                for(x = 0; x < levels.length; x++)
-                    clockLevels[i][x] = Integer.valueOf(levels[x]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            line = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"));
+            levels = line.split("[ \t]");
+            clockLevels[core]=new int[levels.length];
+            currentClockLevel[core][1]=levels.length;
+            amountOfValuesPerCore=levels.length;
+            if(core==0)
+                currentClockLevel[core][2]=1;
+            for(x = 0; x < levels.length; x++)
+                clockLevels[core][x] = Integer.valueOf(levels[x]);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -156,8 +150,10 @@ public final class CpuManager {
         StringBuilder path = new StringBuilder();
         //Ligar o core caso esteja offline
         if(speed!=0) {
-            if(currentClockLevel[core][2]==0)
+            if(currentClockLevel[core][2]==0) {
                 turnCoreOnOff(core, true);
+            }
+            adjustMinAndMaxSpeed(core);
             try {
                 path.setLength(0);
                 path.append(String.format("echo %d" + " > " + pathCPU + core + "/cpufreq/scaling_setspeed", speed));
@@ -201,17 +197,16 @@ public final class CpuManager {
         return ps.toString();
     }//ok
 
-    public void setConfigurationToMinimum(){
-        for(int i=1;i<numberOfCores;i++)
-            turnCoreOnOff(i,false);
-        writeSpeedOnCore(0,clockLevels[0][6]);
-    }
-
     public void adjustConfiguration(ArrayList<String> arrayConfiguration){
         int x,i;
-        for(i=2,x=0;i<arrayConfiguration.size();i++,x++){
-            writeSpeedOnCore(x,Integer.parseInt(arrayConfiguration.get(i)));
+        if(arrayConfiguration.size()==0){
+            for(i=1;i<numberOfCores;i++)
+                turnCoreOnOff(i,false);
+            writeSpeedOnCore(0,clockLevels[0][6]);
         }
+        else
+            for(i=2,x=0;i<arrayConfiguration.size();i++,x++)
+                writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
     public ArrayList<Integer> getArrayListCoresSpeed(){
@@ -224,22 +219,24 @@ public final class CpuManager {
 
     public void setCpuSpeedFromUserInput(int value){
         //value is percentage
-        int converter = (value*(4* 12))/100;
+        int converter = (value*(numberOfCores* amountOfValuesPerCore))/100;
         setArrayListOfSpeedFromUserInput(converter);
     }
 
     private void setArrayListOfSpeedFromUserInput(int converter) {
         int i=0;
+        boolean flag=true;
         ArrayList<Integer> arrayList = new ArrayList<>();
         while(i<numberOfCores){
             if(converter>=amountOfValuesPerCore) {
                 arrayList.add(i,amountOfValuesPerCore);
+                flag=false;
             }
             else if(converter>0&&converter<amountOfValuesPerCore) {
                 arrayList.add(i, converter);
                 break;
             }
-            else if(converter==0) {
+            else if(converter==0 && flag) {
                 arrayList.add(i, 0);
                 break;
             }
