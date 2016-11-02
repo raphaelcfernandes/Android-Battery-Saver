@@ -120,7 +120,7 @@ public final class CpuManager {
                 path.append("echo 0 > " + pathCPU + core+"/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                currentClockLevel[core][2]=0;
+                currentClockLevel[core][2]=currentClockLevel[core][0]=0;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }

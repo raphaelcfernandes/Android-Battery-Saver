@@ -29,7 +29,7 @@ public class BackgroundService extends Service {
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
     CpuManager object = SingletonClasses.getInstance();
-    private boolean loaded=false,changeDetector=false,firstTimeOnSystem=false;
+    private boolean loaded=true,changeDetector=false,firstTimeOnSystem=false;
     ArrayList<String> arrayList = new ArrayList<>();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
     private String actualApp,lastApp="";
@@ -47,7 +47,7 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
-                if(!actualApp.equals(lastApp))
+                if(!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc"))
                     loaded=false;
                 if(!loaded){//Retrieve app info from DB
                     //carregar actualApp

@@ -10,12 +10,7 @@ import android.widget.Button;
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.AppManager;
-import com.example.raphael.tcc.Managers.CpuManager;
 import com.example.raphael.tcc.R;
-import com.example.raphael.tcc.SingletonClasses;
-
-import java.util.ArrayList;
-import java.util.regex.Matcher;
 
 public class MainActivity extends Activity {
     AppManager appManager = new AppManager();
