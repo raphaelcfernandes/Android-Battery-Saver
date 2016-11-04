@@ -24,15 +24,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
+    /**
+     * Objects
+     */
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private BubbleButton bubbleButton = new BubbleButton();
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
-    CpuManager object = SingletonClasses.getInstance();
-    private boolean loaded=true,changeDetector=false,firstTimeOnSystem=false;
-    ArrayList<String> arrayList = new ArrayList<>();
+    private CpuManager object = SingletonClasses.getInstance();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
-    private String actualApp,lastApp="";
+
+    /**
+     * Variables
+     */
+    ArrayList<String> arrayList = new ArrayList<>();
+    private static boolean loaded=true,changeDetector=false,firstTimeOnSystem=false,screenOnOff=true, loadLastAppOnScreenOnOff = false;
+    private static String actualApp,lastApp="";
+    private static int brightnessValue;
 
     @Nullable
     @Override
@@ -42,26 +50,38 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent,flags,startId);
-        Toast.makeText(this,"Service Started", Toast.LENGTH_LONG).show();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                actualApp=appManager.getAppRunningOnForeground(BackgroundService.this);
-                if(!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc"))
-                    loaded=false;
-                if(!loaded){//Retrieve app info from DB
-                    //carregar actualApp
-                    arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(),actualApp);
-                    if(!actualApp.equals(lastApp) && !lastApp.equals("")){
-                        if(changeDetector)
-                            appDbHelper.updateAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
-                        else if(firstTimeOnSystem)
-                            appDbHelper.insertAppConfiguration(lastApp,brightnessManager.getScreenBrightnessLevel(),object.getArrayListCoresSpeed());
+                if(screenOnOff) {
+                    loadLastAppOnScreenOnOff=true;//Recarregar last app
+                    actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
+                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc"))
+                        loaded = false;
+                    if (!loaded) {//Retrieve app info from DB
+                        //carregar actualApp
+                        arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
+                        if(!arrayList.isEmpty())
+                            brightnessValue = Integer.parseInt(arrayList.get(1));
+                        if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
+                            if (changeDetector)
+                                appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), object.getArrayListCoresSpeed());
+                            else if (firstTimeOnSystem)
+                                appDbHelper.insertAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), object.getArrayListCoresSpeed());
+                        }
+                        setAppConfiguration(arrayList);
+                        loaded = true;
+                        lastApp = actualApp;
+                        changeDetector = false;
                     }
-                    setAppConfiguration(arrayList);
-                    loaded=true;
-                    lastApp = actualApp;
-                    changeDetector=false;
+                }
+                else if(loadLastAppOnScreenOnOff){
+                    loadLastAppOnScreenOnOff=false;
+                    if(arrayList.isEmpty())
+                        appDbHelper.updateAppConfiguration(actualApp, BrightnessManager.minLevel, object.getArrayListCoresSpeed());
+                    else
+                        appDbHelper.updateAppConfiguration(actualApp, brightnessValue, object.getArrayListCoresSpeed());
+                    loaded=false;//recarregar config
                 }
             }
         },1,2,SECONDS);
@@ -72,7 +92,11 @@ public class BackgroundService extends Service {
     public void onCreate(){
         super.onCreate();
         bubbleButton.createFeedBackButton(getApplicationContext());
-        registerReceiver(broadcastRcv, new IntentFilter("com.example.raphael.tcc.REQUESTED_MORE_CPU"));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
+        registerReceiver(broadcastRcv, filter);
+
    }
     @Override
     public void onDestroy() {
@@ -91,7 +115,7 @@ public class BackgroundService extends Service {
             firstTimeOnSystem=false;
         }
         else {
-            brightnessManager.setBrightnessLevel(100);
+            brightnessManager.setBrightnessLevel(BrightnessManager.minLevel);
             firstTimeOnSystem = true;
         }
     }
@@ -106,6 +130,12 @@ public class BackgroundService extends Service {
                 object.setCpuSpeedFromUserInput(value);
                 changeDetector=true;
             }
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                changeDetector = false;
+                screenOnOff=false;
+            }
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+                screenOnOff = true;
         }
     };
 }

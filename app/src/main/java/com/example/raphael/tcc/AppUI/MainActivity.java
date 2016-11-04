@@ -8,13 +8,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
-import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.R;
 
 public class MainActivity extends Activity {
     AppManager appManager = new AppManager();
-    AppDbHelper appDbHelper = new AppDbHelper(MainActivity.this);
     Button b1,b2;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +39,6 @@ public class MainActivity extends Activity {
                 stopService(new Intent(getBaseContext(),BackgroundService.class));
             }
         });
-        //appDbHelper.insertAppConfiguration("com.example.raphael.tcc",180,1026000,0,0,0);
     }
     public void onResume() {
         super.onResume();
