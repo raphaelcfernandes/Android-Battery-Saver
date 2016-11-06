@@ -82,6 +82,8 @@ public class BackgroundService extends Service {
                     else
                         appDbHelper.updateAppConfiguration(actualApp, brightnessValue, object.getArrayListCoresSpeed());
                     loaded=false;//recarregar config
+                    arrayList.clear();
+                    object.adjustConfiguration(arrayList);
                 }
             }
         },1,2,SECONDS);

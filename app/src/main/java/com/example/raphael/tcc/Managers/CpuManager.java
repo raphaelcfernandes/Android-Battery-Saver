@@ -55,7 +55,6 @@ public final class CpuManager {
             //Fill the matrix of clockLevels
             fillClockLevelMatrix(i);
             //Set Min and Max Freq based on ClockLevelMatrix
-            //adjustMinAndMaxSpeed(i);
             if(i!=0)
                 turnCoreOnOff(i, false);
         }
@@ -202,7 +201,7 @@ public final class CpuManager {
         if(arrayConfiguration.size()==0){
             for(i=1;i<numberOfCores;i++)
                 turnCoreOnOff(i,false);
-            writeSpeedOnCore(0,clockLevels[0][6]);
+            writeSpeedOnCore(0,clockLevels[0][0]);
         }
         else
             for(i=2,x=0;i<arrayConfiguration.size();i++,x++)
