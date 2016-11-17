@@ -68,9 +68,9 @@ public class BubbleButton {
         });
     }
     public void removeView() {
-        if (floatingButton != null){
+
             windowManager.removeView(floatingButton);
-        }
+
     }
 
 }

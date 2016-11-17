@@ -1,7 +1,9 @@
 package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
+import android.support.annotation.RequiresPermission;
 
+import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SearchAlgorithms;
 
 import java.io.BufferedReader;
@@ -75,7 +77,33 @@ public final class CpuManager {
             e.printStackTrace();
         }
     }
+    public void giveAndroidFullControl() {
 
+        for (int i = 0; i < numberOfCores; ++i) {
+            turnCoreOnOff(i, true);
+            //Set userspace on the cores so one can write the configuration into cpu files
+            StringBuilder path = new StringBuilder();
+            try {
+                path.setLength(0);
+                path.append("echo ondemand > "+pathCPU+i+"/cpufreq/scaling_governor");
+                Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
+                proc.waitFor();
+                path.setLength(0);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (i != 0)
+                turnCoreOnOff(i, false);
+        }
+        String stopMpDecision = "start mpdecision";
+        try {
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
+            proc.waitFor();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+
+        }
+    }
     private void stopMpDecision(){
         String stopMpDecision = "stop mpdecision";
         try{
@@ -131,13 +159,15 @@ public final class CpuManager {
         String[] levels;
         int x;
         try {
-            line = returnStringFromProcess(Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"));
+            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[] {"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"}));
             levels = line.split("[ \t]");
             clockLevels[core]=new int[levels.length];
             currentClockLevel[core][1]=levels.length;
             amountOfValuesPerCore=levels.length;
-            if(core==0)
-                currentClockLevel[core][2]=1;
+            if(core==0) {
+                currentClockLevel[core][2] = 1;
+                currentClockLevel[core][0]=Integer.valueOf(levels[0]);
+            }
             for(x = 0; x < levels.length; x++)
                 clockLevels[core][x] = Integer.valueOf(levels[x]);
         } catch (IOException e) {
@@ -183,18 +213,9 @@ public final class CpuManager {
         int sum=0;
         for(int i = 0; i< numberOfCores && currentClockLevel[i][2]==1; ++i)
             sum += SearchAlgorithms.binarySearch(currentClockLevel[i][0],i, clockLevels);
+        System.out.println(sum);
         return sum;
     }
-
-    private String returnStringFromProcess(Process proc) throws IOException {
-        StringBuilder ps = new StringBuilder();
-        String s;
-        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        while ((s = stdInput.readLine()) != null) {
-            ps.append(s);
-        }
-        return ps.toString();
-    }//ok
 
     public void adjustConfiguration(ArrayList<String> arrayConfiguration){
         int x,i;
@@ -245,7 +266,7 @@ public final class CpuManager {
             converter-=amountOfValuesPerCore;
         }
         for(i=0;i<arrayList.size();i++) {
-            if(arrayList.get(i)==12)
+            if(arrayList.get(i)==amountOfValuesPerCore)
                 writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)-1]);
             else
                 writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)]);

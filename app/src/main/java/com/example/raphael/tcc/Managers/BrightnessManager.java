@@ -1,5 +1,7 @@
 package com.example.raphael.tcc.Managers;
 
+import android.support.annotation.RequiresPermission;
+
 import com.example.raphael.tcc.ReadWriteFile;
 
 import java.io.IOException;
@@ -13,7 +15,7 @@ public class BrightnessManager {
     public int getScreenBrightnessLevel(){
         String s = null;
         try {
-            s = ReadWriteFile.read("/sys/class/leds/lcd-backlight/brightness");
+            s = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[] {"su", "-c", "cat /sys/class/leds/lcd-backlight/brightness"}));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -21,7 +23,7 @@ public class BrightnessManager {
     }
     public boolean setBrightnessLevel(int level){
         try {
-            Process proc =Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
+            Process proc = Runtime.getRuntime().exec(new String[] {"su", "-c", "echo " + level + " > " + "/sys/class/leds/lcd-backlight/brightness"});
             proc.waitFor();
             return true;
         } catch (IOException | InterruptedException e) {
