@@ -56,7 +56,7 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc"))
+                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui"))
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
                         //carregar actualApp

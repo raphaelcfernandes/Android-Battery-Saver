@@ -82,8 +82,8 @@ public class FeedBackPopUpWindow extends Activity {
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.x = -20;
-        params.height = 500;
-        params.width = 550;
+        params.height = 1000;
+        params.width = 1000;
         params.y = -10;
         this.getWindow().setAttributes(params);
     }
