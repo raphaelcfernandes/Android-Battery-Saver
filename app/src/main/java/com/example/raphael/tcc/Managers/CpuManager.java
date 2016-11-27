@@ -16,7 +16,7 @@ public final class CpuManager {
     private String pathCPU = "/sys/devices/system/cpu/cpu";
     private static int[][] clockLevels;
     private static int[][] currentClockLevel;
-    private static int amountOfValuesPerCore;
+    private static int amountOfValuesPerCore=0;
     private static boolean isClockLevelsFilled=false;
 
     public CpuManager(){
@@ -144,7 +144,8 @@ public final class CpuManager {
                 path.append("echo 0 > " + pathCPU + core+"/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                currentClockLevel[core][2]=currentClockLevel[core][0]=0;
+                currentClockLevel[core][2]=0;
+                currentClockLevel[core][0]=0;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -160,7 +161,7 @@ public final class CpuManager {
             levels = line.split("[ \t]");
             clockLevels[core]=new int[levels.length];
             currentClockLevel[core][1]=levels.length;
-            amountOfValuesPerCore=levels.length;
+            amountOfValuesPerCore=levels.length;//Problema se o ultimo processador tiver menos frequencia q os demais
             if(core==0) {
                 currentClockLevel[core][2] = 1;
                 currentClockLevel[core][0]=Integer.valueOf(levels[0]);

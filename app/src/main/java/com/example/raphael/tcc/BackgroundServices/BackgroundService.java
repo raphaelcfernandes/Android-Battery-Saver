@@ -80,7 +80,7 @@ public class BackgroundService extends Service {
                     loadLastAppOnScreenOnOff=false;
                     if(arrayList.isEmpty())
                         appDbHelper.updateAppConfiguration(actualApp, BrightnessManager.minLevel, object.getArrayListCoresSpeed());
-                    else
+                    else if(changeDetector || firstTimeOnSystem)
                         appDbHelper.updateAppConfiguration(actualApp, brightnessValue, object.getArrayListCoresSpeed());
                     loaded=false;//recarregar config
                     arrayList.clear();
@@ -134,7 +134,7 @@ public class BackgroundService extends Service {
                 changeDetector=true;
             }
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                changeDetector = false;
+                //changeDetector = false;
                 screenOnOff=false;
             }
             if(intent.getAction().equals(Intent.ACTION_SCREEN_ON))
