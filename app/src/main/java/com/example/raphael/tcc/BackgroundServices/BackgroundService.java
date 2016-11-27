@@ -57,8 +57,7 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    System.out.println("carreguei");
-                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
+                    if (!actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
                         //carregar actualApp
@@ -88,7 +87,7 @@ public class BackgroundService extends Service {
                     object.adjustConfiguration(arrayList);
                 }
             }
-        },25,50,MILLISECONDS);
+        },1,1,SECONDS);
         return START_STICKY;
     }
 
