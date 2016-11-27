@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
@@ -56,7 +57,8 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui"))
+                    System.out.println("carreguei");
+                    if (!actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
                         //carregar actualApp
@@ -86,7 +88,7 @@ public class BackgroundService extends Service {
                     object.adjustConfiguration(arrayList);
                 }
             }
-        },1,2,SECONDS);
+        },25,50,MILLISECONDS);
         return START_STICKY;
     }
 

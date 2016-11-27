@@ -1,16 +1,13 @@
 package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
-import android.support.annotation.RequiresPermission;
 
 import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SearchAlgorithms;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
