@@ -34,7 +34,7 @@ public class BackgroundService extends Service {
     private BrightnessManager brightnessManager = new BrightnessManager();
     private CpuManager object = SingletonClasses.getInstance();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
-
+    private int teste=0;
     /**
      * Variables
      */
@@ -57,7 +57,15 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if (!actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
+                    if(actualApp.equals("com.android.launcher"))
+                        teste++;
+                    if(teste>=5){
+                        arrayList.clear();
+                        setAppConfiguration(arrayList);
+                        teste=0;
+                        lastApp="";
+                    }
+                    if (!actualApp.equals("com.android.launcher") && !actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
                         //carregar actualApp
