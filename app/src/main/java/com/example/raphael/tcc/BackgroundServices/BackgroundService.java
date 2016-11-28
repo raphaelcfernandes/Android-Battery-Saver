@@ -57,7 +57,7 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if(actualApp.equals("com.android.launcher"))
+                    if(actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
                         teste++;
                     if(teste>=5){
                         arrayList.clear();
