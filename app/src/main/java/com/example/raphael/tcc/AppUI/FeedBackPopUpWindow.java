@@ -3,6 +3,7 @@ package com.example.raphael.tcc.AppUI;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import com.example.raphael.tcc.Managers.BrightnessManager;
@@ -79,11 +80,14 @@ public class FeedBackPopUpWindow extends Activity {
             public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
             }
         });
-
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.x = -20;
-        params.height = 1000;
-        params.width = 1000;
+        params.height = height/3;
+        params.width = width/2;
         params.y = -10;
         this.getWindow().setAttributes(params);
     }
