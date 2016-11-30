@@ -164,7 +164,7 @@ public final class CpuManager {
             amountOfValuesPerCore=levels.length;//Problema se o ultimo processador tiver menos frequencia q os demais
             if(core==0) {
                 currentClockLevel[core][2] = 1;
-                currentClockLevel[core][0]=Integer.valueOf(levels[0]);
+                currentClockLevel[core][0]=Integer.valueOf(levels[levels.length/2]);
             }
             for(x = 0; x < levels.length; x++)
                 clockLevels[core][x] = Integer.valueOf(levels[x]);
@@ -220,7 +220,7 @@ public final class CpuManager {
         if(arrayConfiguration.size()==0){
             for(i=1;i<numberOfCores;i++)
                 turnCoreOnOff(i,false);
-            writeSpeedOnCore(0,clockLevels[0][0]);
+            writeSpeedOnCore(0,clockLevels[0][((currentClockLevel[0][1])/2)+1]);
         }
         else
             for(i=2,x=0;i<arrayConfiguration.size();i++,x++)

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class BackgroundService extends Service {
@@ -57,6 +56,8 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
+                    System.out.println("Actual: " +actualApp);
+                    System.out.println("Last: " +lastApp);
                     if(actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
                         teste++;
                     if(teste>=5){
@@ -65,7 +66,8 @@ public class BackgroundService extends Service {
                         teste=0;
                         lastApp="";
                     }
-                    if (!actualApp.equals("com.android.launcher") && !actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc") && !actualApp.equals("com.android.systemui") && !actualApp.equals("android"))
+                    if (!actualApp.equals("com.android.launcher") && !actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc")
+                            && !actualApp.equals("com.android.systemui") && !actualApp.equals("android") && !actualApp.isEmpty())
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
                         //carregar actualApp
@@ -84,7 +86,7 @@ public class BackgroundService extends Service {
                         changeDetector = false;
                     }
                 }
-                else if(loadLastAppOnScreenOnOff){
+                else if(loadLastAppOnScreenOnOff){//Quando a tela desligar, coloque no minimo. Mas adjustConfig estará setando para length/2
                     loadLastAppOnScreenOnOff=false;
                     if(arrayList.isEmpty())
                         appDbHelper.updateAppConfiguration(actualApp, BrightnessManager.minLevel, object.getArrayListCoresSpeed());

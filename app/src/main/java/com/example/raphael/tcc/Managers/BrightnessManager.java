@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public class BrightnessManager {
     //Files can be found at /sys/class/leds/lcd-backlight/
-    public static int minLevel=1;
+    public static int minLevel=5;
     public int getScreenBrightnessLevel(){
         String s = null;
         try {
