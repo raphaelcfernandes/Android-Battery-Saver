@@ -56,8 +56,7 @@ public class BackgroundService extends Service {
                 if(screenOnOff) {
                     loadLastAppOnScreenOnOff=true;//Recarregar last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    System.out.println("Actual: " +actualApp);
-                    System.out.println("Last: " +lastApp);
+                    System.out.println("to aqui");
                     if(actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
                         teste++;
                     if(teste>=5){
@@ -98,7 +97,7 @@ public class BackgroundService extends Service {
                 }
             }
         },1,1,SECONDS);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -111,11 +110,15 @@ public class BackgroundService extends Service {
         registerReceiver(broadcastRcv, filter);
 
    }
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
         unregisterReceiver(broadcastRcv);
+        scheduler.shutdown();
+        object.giveAndroidFullControl();
         stopService(new Intent(this,BackgroundService.class));
         bubbleButton.removeView();
     }

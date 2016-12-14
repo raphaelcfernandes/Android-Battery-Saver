@@ -37,7 +37,22 @@ public final class CpuManager {
             prepareCores();
         }
     }
-
+    private String bestCoreToTurnBack(){
+        String line = "";
+        String [] levels;
+        try {
+            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[] {"su", "-c", "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"}));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        levels = line.split("[ \t]");
+        for(String a : levels){
+            if(a.equals("interactive")) {
+                return a;
+            }
+        }
+        return "ondemand";
+    }
     public static int getNumberOfCores(){
         return numberOfCores;
     }
@@ -74,6 +89,7 @@ public final class CpuManager {
             e.printStackTrace();
         }
     }
+
     public void giveAndroidFullControl() {
 
         for (int i = 0; i < numberOfCores; ++i) {
@@ -82,7 +98,7 @@ public final class CpuManager {
             StringBuilder path = new StringBuilder();
             try {
                 path.setLength(0);
-                path.append("echo ondemand > "+pathCPU+i+"/cpufreq/scaling_governor");
+                path.append("echo "+  bestCoreToTurnBack()+" > "+pathCPU+i+"/cpufreq/scaling_governor");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
                 proc.waitFor();
                 path.setLength(0);
