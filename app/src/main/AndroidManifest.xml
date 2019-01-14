@@ -6,13 +6,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.READ_LOGS"    />
+    <!--<uses-permission android:name="android.permission.READ_LOGS"/>-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <!--<uses-permission android:name="android.permission.WRITE_SETTINGS"/>-->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore = "ProtectedPermissions"/>
 
@@ -34,14 +33,15 @@
         <activity android:name=".AppUI.FeedBackPopUpWindow"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Holo.Dialog">
+            <intent-filter>
+                <action android:name="com.example.raphael.tcc.REQUESTED_MORE_CPU"></action>
+            </intent-filter>
         </activity>
         <service android:name=".BackgroundServices.BackgroundService"
             android:stopWithTask="true"
             android:launchMode="singleInstance"/>
 
-        <intent-filter>
-            <action android:name="com.example.raphael.tcc.REQUESTED_MORE_CPU"></action>
-        </intent-filter>
+
 
     </application>
 
