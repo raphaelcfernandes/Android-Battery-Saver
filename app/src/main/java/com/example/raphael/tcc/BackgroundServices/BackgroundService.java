@@ -33,7 +33,7 @@ public class BackgroundService extends Service {
     private BrightnessManager brightnessManager = new BrightnessManager();
     private CpuManager object = SingletonClasses.getInstance();
     private AppDbHelper appDbHelper = new AppDbHelper(BackgroundService.this);
-    private int teste=0;
+    private int timer = 0;
     /**
      * Variables
      */
@@ -54,22 +54,21 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 if(screenOnOff) {
-                    loadLastAppOnScreenOnOff=true;//Recarregar last app
+                    loadLastAppOnScreenOnOff=true;//Reload last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    System.out.println("to aqui");
                     if(actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
-                        teste++;
-                    if(teste>=5){
+                        timer++;
+                    if(timer >= 5){
                         arrayList.clear();
                         setAppConfiguration(arrayList);
-                        teste=0;
+                        timer =0;
                         lastApp="";
                     }
                     if (!actualApp.equals("com.android.launcher") && !actualApp.equals("com.google.android.googlequicksearchbox") && !actualApp.equals(lastApp) && !actualApp.equals("com.example.raphael.tcc")
                             && !actualApp.equals("com.android.systemui") && !actualApp.equals("android") && !actualApp.isEmpty())
                         loaded = false;
                     if (!loaded) {//Retrieve app info from DB
-                        //carregar actualApp
+                        //reload actualApp
                         arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
                         if(!arrayList.isEmpty())
                             brightnessValue = Integer.parseInt(arrayList.get(1));
@@ -85,13 +84,13 @@ public class BackgroundService extends Service {
                         changeDetector = false;
                     }
                 }
-                else if(loadLastAppOnScreenOnOff){//Quando a tela desligar, coloque no minimo. Mas adjustConfig estará setando para length/2
+                else if(loadLastAppOnScreenOnOff){//When the screen turn off, put all config to min.
                     loadLastAppOnScreenOnOff=false;
                     if(arrayList.isEmpty())
                         appDbHelper.updateAppConfiguration(actualApp, BrightnessManager.minLevel, object.getArrayListCoresSpeed());
                     else if(changeDetector || firstTimeOnSystem)
                         appDbHelper.updateAppConfiguration(actualApp, brightnessValue, object.getArrayListCoresSpeed());
-                    loaded=false;//recarregar config
+                    loaded=false;//reload config
                     arrayList.clear();
                     object.adjustConfiguration(arrayList);
                 }
@@ -108,8 +107,7 @@ public class BackgroundService extends Service {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
         registerReceiver(broadcastRcv, filter);
-
-   }
+    }
 
 
     @Override
@@ -119,8 +117,8 @@ public class BackgroundService extends Service {
         unregisterReceiver(broadcastRcv);
         scheduler.shutdown();
         object.giveAndroidFullControl();
-        stopService(new Intent(this,BackgroundService.class));
         bubbleButton.removeView();
+        stopService(new Intent(this,BackgroundService.class));
     }
 
     private void setAppConfiguration(ArrayList<String> appConfiguration){

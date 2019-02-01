@@ -15,7 +15,6 @@
         android:id="@+id/textView"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:text="Selecione uma opção abaixo para Ativar ou Desativar o CPU Adaptive Control "
         android:textSize="18sp" />
 
     <FrameLayout
@@ -35,7 +34,7 @@
                 android:layout_width="150dp"
                 android:layout_height="40dp"
                 android:clickable="true"
-                android:text="Desativar"
+                android:text="Deactivate"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true" />
 
@@ -44,7 +43,7 @@
                 android:layout_width="150dp"
                 android:layout_height="40dp"
                 android:clickable="true"
-                android:text="ativar"
+                android:text="Activate"
                 android:elevation="0dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true" />

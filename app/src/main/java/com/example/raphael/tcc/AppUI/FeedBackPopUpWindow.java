@@ -33,7 +33,7 @@ public class FeedBackPopUpWindow extends Activity {
         /**
          * SeekBark Brightness
          */
-        seekBarBrightness = (DiscreteSeekBar) findViewById(R.id.seekBarBrightness);
+        seekBarBrightness = findViewById(R.id.seekBarBrightness);
         seekBarBrightness.setMin(0);
         seekBarBrightness.setProgress((brightnessManager.getScreenBrightnessLevel()*100)/255);
         seekBarBrightness.setMax(100);//Percentage
@@ -59,7 +59,7 @@ public class FeedBackPopUpWindow extends Activity {
         /**
          * SeekBar CPU
          */
-        seekBarCpu = (DiscreteSeekBar) findViewById(R.id.seekBarCpu);
+        seekBarCpu = findViewById(R.id.seekBarCpu);
         seekBarCpu.setMin(1);
         seekBarCpu.setProgress(object.getSumNumberCore());
         seekBarCpu.setMax(100);

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "23.0.3"
+
 
     defaultConfig {
         applicationId "com.example.raphael.tcc"
@@ -20,11 +20,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.+'
-    compile 'org.jetbrains:annotations-java5:15.0'
-    compile 'org.jetbrains:annotations-java5:15.0'
-    compile 'org.jetbrains:annotations-java5:15.0'
-    compile 'org.adw.library:discrete-seekbar:1.0.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:26.+'
+    implementation 'org.jetbrains:annotations-java5:15.0'
+    implementation 'org.jetbrains:annotations-java5:15.0'
+    implementation 'org.jetbrains:annotations-java5:15.0'
+    implementation 'org.adw.library:discrete-seekbar:1.0.1'
 }

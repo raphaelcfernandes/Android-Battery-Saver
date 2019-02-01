@@ -3,6 +3,7 @@ package com.example.raphael.tcc.AppUI;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,7 +14,7 @@ import com.example.raphael.tcc.R;
 
 import java.util.Calendar;
 
-public class BubbleButton {
+public class BubbleButton{
     private WindowManager windowManager;
     private ImageView floatingButton;
     private String CUSTOM_INTENT="com.example.raphael.tcc.CreateMenuWindow";
@@ -22,10 +23,16 @@ public class BubbleButton {
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         floatingButton = new ImageView(context);
         floatingButton.setImageResource(R.mipmap.ic_cross_symbol);
+        int LAYOUT_FLAG;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
+        }
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
+                LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
