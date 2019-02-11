@@ -75,9 +75,7 @@ public class BubbleButton{
         });
     }
     public void removeView() {
-
             windowManager.removeView(floatingButton);
-
     }
 
 }

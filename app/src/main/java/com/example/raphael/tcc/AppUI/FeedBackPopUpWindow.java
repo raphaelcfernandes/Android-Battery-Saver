@@ -20,10 +20,10 @@ import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 public class FeedBackPopUpWindow extends Activity {
     private boolean isProgressBarBrightnessMoved=false;
     private boolean isProgressBarCpuMoved=false;
-    DiscreteSeekBar seekBarBrightness;
-    DiscreteSeekBar seekBarCpu;
-    BrightnessManager brightnessManager = new BrightnessManager();
-    CpuManager object = SingletonClasses.getInstance();
+    private DiscreteSeekBar seekBarBrightness;
+    private DiscreteSeekBar seekBarCpu;
+    private BrightnessManager brightnessManager = new BrightnessManager();
+    private CpuManager object = SingletonClasses.getInstance();
     private static int cpuBarValue;
     @Override
     public void onCreate(Bundle savedInstancedBundle){
@@ -31,7 +31,7 @@ public class FeedBackPopUpWindow extends Activity {
         setContentView(R.layout.custom_dialog);
 
         /**
-         * SeekBark Brightness
+         * SeekBar Brightness
          */
         seekBarBrightness = findViewById(R.id.seekBarBrightness);
         seekBarBrightness.setMin(0);
