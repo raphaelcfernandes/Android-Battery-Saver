@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Android-Battery-Saver.iml" filepath="$PROJECT_DIR$/Android-Battery-Saver.iml" />
-      <module fileurl="file://$PROJECT_DIR$/TCC.iml" filepath="$PROJECT_DIR$/TCC.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

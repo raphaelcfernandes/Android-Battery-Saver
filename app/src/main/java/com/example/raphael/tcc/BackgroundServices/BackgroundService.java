@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
+import com.example.raphael.tcc.AppUI.SpeedUpNotification;
 import com.example.raphael.tcc.DataBase.AppDbHelper;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.Managers.BrightnessManager;
@@ -29,6 +30,7 @@ public class BackgroundService extends Service {
      */
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final BubbleButton bubbleButton = new BubbleButton();
+    private final SpeedUpNotification speedUpNotification = new SpeedUpNotification(); //Create notification handler
     private AppManager appManager = new AppManager();
     private BrightnessManager brightnessManager = new BrightnessManager();
     private CpuManager cpuManager = SingletonClasses.getInstance();
@@ -109,18 +111,24 @@ public class BackgroundService extends Service {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
         registerReceiver(broadcastRcv, filter);
+
+        //Create the notification
+        speedUpNotification.createSpeedUpNotification(this);
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this,"Service stoped", Toast.LENGTH_LONG).show();
+        Toast.makeText(this,"Service stopped", Toast.LENGTH_LONG).show();
         unregisterReceiver(broadcastRcv);
         scheduler.shutdown();
         cpuManager.giveAndroidFullControl();
         bubbleButton.removeView();
         stopService(new Intent(this,BackgroundService.class));
+
+        //Remove the notification
+        speedUpNotification.removeNotification(this);
     }
 
     private void setAppConfiguration(ArrayList<String> appConfiguration){
