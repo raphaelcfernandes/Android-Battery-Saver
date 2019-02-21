@@ -19,27 +19,30 @@ import com.example.raphael.tcc.R;
 public class SpeedUpNotification
 {
     private Intent speedUpIntent = new Intent("com.example.raphael.tcc.REQUESTED_MORE_CPU");
-    private static final int SPEEDUPNOTIFICATION_ID = 1;
+    private static final int SPEEDUPNOTIFICATION_ID = 1; //Identifier for this specific notification
 
+    //This method creates the notification when the app is started
     public void createSpeedUpNotification(Context context)
     {
+        //Notification sends this on press
         PendingIntent pendingSpeedUpIntent = PendingIntent.getActivity(context, 0, speedUpIntent, 0);
 
         NotificationCompat.Builder speedUpBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_speedup_image)
-                .setContentTitle("CPU Speed Manager")
-                .setContentText("Tap this notification to increase speed.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingSpeedUpIntent)
-                .setOngoing(true);
+                .setSmallIcon(R.drawable.ic_speedup_image) //Notification image
+                .setContentTitle("CPU Speed Manager") //Title of notification
+                .setContentText("Tap this notification to increase speed.") //Small text under title
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT) //Default priority setting(subject to change)
+                .setContentIntent(pendingSpeedUpIntent) //Will pass this when pressed
+                .setOngoing(true); // Makes the notification stay after it's pressed
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(SPEEDUPNOTIFICATION_ID, speedUpBuilder.build());
     }
 
+    //This method will remove the notification from the bar when the app is killed
     public void removeNotification(Context context)
     {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(SPEEDUPNOTIFICATION_ID);
+        notificationManager.cancel(SPEEDUPNOTIFICATION_ID); //Cancel is how NM removes the notification
     }
 }
