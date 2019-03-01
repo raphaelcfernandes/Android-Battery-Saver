@@ -11,6 +11,8 @@ import android.content.Intent;
 
 import com.example.raphael.tcc.R;
 
+import static android.app.Notification.EXTRA_NOTIFICATION_ID;
+
 /*
     Android Battery Saver
     This class will handle the notification pop up to increase speed.
@@ -33,6 +35,7 @@ public class SpeedUpNotification
                 .setContentText("Tap this notification to increase speed.") //Small text under title
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT) //Default priority setting(subject to change)
                 .setContentIntent(pendingSpeedUpIntent) //Will pass this when pressed
+                .addAction(R.drawable.ic_speedup_image,"speedup",pendingSpeedUpIntent)
                 .setOngoing(true); // Makes the notification stay after it's pressed
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
