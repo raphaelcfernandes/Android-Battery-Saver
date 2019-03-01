@@ -14,10 +14,14 @@ import android.widget.Button;
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
 import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.R;
+import com.example.raphael.tcc.ReadWriteFile;
+
+import java.io.IOException;
 
 public class MainActivity extends Activity {
-    AppManager appManager = new AppManager();
-    Button b1, b2;
+    private AppManager appManager = new AppManager();
+    private Button b1;
+    private Button b2;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,21 +56,5 @@ public class MainActivity extends Activity {
 
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Teste";
-            String description = "Description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("Channel", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 }

@@ -7,7 +7,7 @@ import android.location.LocationManager;
  * Created by Raphael on 20-Apr-16.
  */
 public class GpsManager {
-    LocationManager manager;
+    private LocationManager manager;
     public int getStatusGps(Context context){
         manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER))

@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothAdapter;
  * Created by Raphael on 20-Apr-16.
  */
 public class BluetoothManager {
-    BluetoothAdapter blueT;
+    private BluetoothAdapter blueT;
     public int getBluetoothStatus(){
         blueT = BluetoothAdapter.getDefaultAdapter();
         if(blueT.isEnabled())
