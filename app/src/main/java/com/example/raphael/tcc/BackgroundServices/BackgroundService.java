@@ -106,7 +106,8 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-        bubbleButton.createFeedBackButton(getApplicationContext());
+        //removed bubbleButton
+        //bubbleButton.createFeedBackButton(getApplicationContext());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
@@ -124,7 +125,9 @@ public class BackgroundService extends Service {
         unregisterReceiver(broadcastRcv);
         scheduler.shutdown();
         cpuManager.giveAndroidFullControl();
-        bubbleButton.removeView();
+        //bubbleButton.removeView();
+        //remove notification
+        speedUpNotification.removeNotification(this);
         stopService(new Intent(this,BackgroundService.class));
 
         //Remove the notification
