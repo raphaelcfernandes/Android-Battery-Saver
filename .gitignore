@@ -6,5 +6,5 @@
 .DS_Store
 /build
 /captures
-.idea
+.idea\*
 .idea/caches/gradle_models.ser

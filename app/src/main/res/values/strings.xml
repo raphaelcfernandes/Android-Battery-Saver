@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">CPU Adaptive Control</string>
+    <string name="bubble_button">Bubble Button</string>
+    <string name="notification_bar">Notification Bar</string>
+    <string name="activate">Activate</string>
+    <string name="deactivate">Deactivate</string>
 </resources>
