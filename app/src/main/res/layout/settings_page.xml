@@ -3,34 +3,27 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <android.support.v4.view.PagerTabStrip
-            android.id="@+id/pager_tab_strip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android.layout_gravity="top" />
-
-    </android.support.v4.view.ViewPager>
-
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/app_name" />
+        android:fontFamily="sans-serif-black"
+        android:lineSpacingExtra="18sp"
+        android:text="@string/settings"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textSize="36sp" />
 
     <Switch
         android:id="@+id/BubbleButtonSwitch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="85dp"
         android:text="@string/bubble_button" />
 
     <Switch
         android:id="@+id/NotificationSwitch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="88dp"
         android:text="@string/notification_bar" />
+
 </LinearLayout>
