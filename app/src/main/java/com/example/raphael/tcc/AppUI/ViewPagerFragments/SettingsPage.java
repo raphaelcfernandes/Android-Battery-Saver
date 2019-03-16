@@ -8,14 +8,17 @@ import android.view.ViewGroup;
 
 import com.example.raphael.tcc.R;
 
-public class MainMenu extends Fragment
+public class SettingsPage extends Fragment
 {
-    public static MainMenu newInstance()
+    private boolean bbButton;
+    private boolean notif;
+
+    public static SettingsPage newInstance()
     {
         Bundle args = new Bundle();
-        MainMenu fragment = new MainMenu();
-        fragment.setArguments(args);
-        return fragment;
+        SettingsPage instance = new SettingsPage();
+        instance.setArguments(args);
+        return instance;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class MainMenu extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflate, ViewGroup container, Bundle savedInstanceState)
     {
-        View newView = inflate.inflate(R.layout.main_menu, container, false);
+        View newView = inflate.inflate(R.layout.settings_page, container, false);
         return newView;
     }
 }
