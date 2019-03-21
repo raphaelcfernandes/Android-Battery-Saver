@@ -1,6 +1,5 @@
 package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
-import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,14 +9,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
-import com.example.raphael.tcc.Managers.AppManager;
 import com.example.raphael.tcc.R;
 
 public class MainMenu extends Fragment
 {
-    private AppManager appManager = new AppManager();
-    private boolean bbSwitch;
-    private boolean notifSwitch;
     private Button activate;
     private Button deactivate;
 

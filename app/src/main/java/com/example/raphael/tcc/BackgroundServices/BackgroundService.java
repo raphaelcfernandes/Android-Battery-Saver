@@ -40,29 +40,32 @@ public class BackgroundService extends Service {
      * Variables
      */
     private ArrayList<String> arrayList = new ArrayList<>();
-    private static boolean loaded=true,changeDetector=false,firstTimeOnSystem=false,screenOnOff=true, loadLastAppOnScreenOnOff = false;
-    private static String actualApp,lastApp="";
+    private static boolean loaded = true, changeDetector = false, firstTimeOnSystem = false, screenOnOff = true, loadLastAppOnScreenOnOff = false;
+    private static String actualApp, lastApp = "";
     private static int brightnessValue;
+    private boolean notifEnabled;
+    private boolean buttonEnabled;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     @Override
     //TODO I think the algorithm is not saving correctly the changes of the user when the screen turns off
     //Todo the cause may be that flag screenOnOff doesnt have a if case when it is False
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent,flags,startId);
+        super.onStartCommand(intent, flags, startId);
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if(screenOnOff) {
-                    loadLastAppOnScreenOnOff=true;//Reload last app
+                if (screenOnOff) {
+                    loadLastAppOnScreenOnOff = true;//Reload last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if(actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
+                    if (actualApp.equals("com.android.launcher") || actualApp.equals("com.google.android.googlequicksearchbox"))
                         timer++;
-                    if(timer >= 5){
+                    if (timer >= 5) {
                         arrayList.clear();
                         setAppConfiguration(arrayList);
                         timer = 0;
@@ -74,7 +77,7 @@ public class BackgroundService extends Service {
                     if (!loaded) {//Retrieve app info from DB
                         //reload actualApp
                         arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
-                        if(!arrayList.isEmpty())
+                        if (!arrayList.isEmpty())
                             brightnessValue = Integer.parseInt(arrayList.get(1));
                         if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
                             if (changeDetector)
@@ -87,24 +90,23 @@ public class BackgroundService extends Service {
                         lastApp = actualApp;
                         changeDetector = false;
                     }
-                }
-                else if(loadLastAppOnScreenOnOff){//When the screen turn off, put all config to min.
-                    loadLastAppOnScreenOnOff=false;
-                    if(arrayList.isEmpty())
+                } else if (loadLastAppOnScreenOnOff) {//When the screen turn off, put all config to min.
+                    loadLastAppOnScreenOnOff = false;
+                    if (arrayList.isEmpty())
                         appDbHelper.updateAppConfiguration(actualApp, BrightnessManager.minLevel, cpuManager.getArrayListCoresSpeed());
-                    else if(changeDetector || firstTimeOnSystem)
+                    else if (changeDetector || firstTimeOnSystem)
                         appDbHelper.updateAppConfiguration(actualApp, brightnessValue, cpuManager.getArrayListCoresSpeed());
-                    loaded=false;//reload config
+                    loaded = false;//reload config
                     arrayList.clear();
                     cpuManager.adjustConfiguration(arrayList);
                 }
             }
-        },1,1,SECONDS);
+        }, 1, 1, SECONDS);
         return START_NOT_STICKY;
     }
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         super.onCreate();
         //removed bubbleButton
         //bubbleButton.createFeedBackButton(getApplicationContext());
@@ -121,48 +123,59 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this,"Service stopped", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Service stopped", Toast.LENGTH_LONG).show();
         unregisterReceiver(broadcastRcv);
         scheduler.shutdown();
         cpuManager.giveAndroidFullControl();
-        //bubbleButton.removeView();
-        //remove notification
-        speedUpNotification.removeNotification(this);
-        stopService(new Intent(this,BackgroundService.class));
 
-        //Remove the notification
         speedUpNotification.removeNotification(this);
+        bubbleButton.removeView();
+        stopService(new Intent(this, BackgroundService.class));
     }
 
-    private void setAppConfiguration(ArrayList<String> appConfiguration){
+    private void setAppConfiguration(ArrayList<String> appConfiguration) {
         //Empty ArrayList? No records found -> set to minimum
         cpuManager.adjustConfiguration(appConfiguration);
-        if(appConfiguration.size()!=0) {
+        if (appConfiguration.size() != 0) {
             brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
-            firstTimeOnSystem=false;
-        }
-        else {
+            firstTimeOnSystem = false;
+        } else {
             brightnessManager.setBrightnessLevel(BrightnessManager.minLevel);
             firstTimeOnSystem = true;
         }
     }
 
-    private final BroadcastReceiver broadcastRcv = new BroadcastReceiver (){
+    private final BroadcastReceiver broadcastRcv = new BroadcastReceiver()
+    {
         @Override
-        public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        int value;
-        if(action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")){
-            value = intent.getIntExtra("valorCpuUsuario",0);
-            cpuManager.setCpuSpeedFromUserInput(value);
-            changeDetector = true;
-        }
-        if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-            //changeDetector = false;
-            screenOnOff = false;
-        }
-        if(intent.getAction().equals(Intent.ACTION_SCREEN_ON))
-            screenOnOff = true;
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+            int value;
+            if (action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")) {
+                value = intent.getIntExtra("valorCpuUsuario", 0);
+                cpuManager.setCpuSpeedFromUserInput(value);
+                changeDetector = true;
+            }
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                //changeDetector = false;
+                screenOnOff = false;
+            }
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+                screenOnOff = true;
+
+            if (intent.getAction().equals("com.example.raphael.tcc.ENABLE_BUTTON"))
+                bubbleButton.createFeedBackButton(getApplicationContext());
+
+            if (intent.getAction().equals("com.example.raphael.tcc.DISABLE_BUTTON"))
+                bubbleButton.removeView();
+
+            if (intent.getAction().equals("com.example.raphael.tcc.ENABLE_NOTIFICATION"))
+                speedUpNotification.createSpeedUpNotification(getApplicationContext());
+
+            if (intent.getAction().equals("com.example.raphael.tcc.DISABLE_NOTIFICATION"))
+                speedUpNotification.removeNotification(getApplicationContext());
         }
     };
 }
+

@@ -74,8 +74,16 @@ public class BubbleButton{
             }
         });
     }
-    public void removeView() {
+    public void removeView()
+    {
+        try
+        {
             windowManager.removeView(floatingButton);
+        }
+        catch(NullPointerException e)
+        {
+
+        }
     }
 
 }

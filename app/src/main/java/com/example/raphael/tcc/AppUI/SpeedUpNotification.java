@@ -46,6 +46,14 @@ public class SpeedUpNotification
     public void removeNotification(Context context)
     {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(SPEEDUPNOTIFICATION_ID); //Cancel is how NM removes the notification
+
+        try
+        {
+            notificationManager.cancel(SPEEDUPNOTIFICATION_ID); //Cancel is how NM removes the notification
+        }
+        catch(NullPointerException e)
+        {
+
+        }
     }
 }
