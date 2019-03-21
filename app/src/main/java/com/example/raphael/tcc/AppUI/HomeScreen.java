@@ -14,6 +14,8 @@ import com.example.raphael.tcc.R;
 public class HomeScreen extends FragmentPagerAdapter
 {
     private static int NUM_PAGES = 3;
+    private boolean bbButton;
+    private boolean notif;
 
     public HomeScreen(FragmentManager fm)
     {
