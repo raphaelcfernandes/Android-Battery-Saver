@@ -48,12 +48,12 @@ public class SettingsPage extends Fragment
                 if(isChecked)
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.ENABLE_BUTTON");
-                    getContext().sendBroadcast(intent);
+                    getActivity().sendBroadcast(intent);
                 }
                 else
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.DISABLE_BUTTON");
-                    getContext().sendBroadcast(intent);
+                    getActivity().sendBroadcast(intent);
                 }
 
             }
@@ -67,12 +67,12 @@ public class SettingsPage extends Fragment
                 if(isChecked) //True if the switch has been set to 'On' position
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.ENABLE_NOTIFICATION");
-                    getActivity().getApplicationContext().sendBroadcast(intent);
+                    getActivity().sendBroadcast(intent);
                 }
                 else //True if the switch is in the 'Off' position
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.DISABLE_NOTIFICATION");
-                    getActivity().getApplicationContext().sendBroadcast(intent);
+                    getActivity().sendBroadcast(intent);
                 }
             }
         });

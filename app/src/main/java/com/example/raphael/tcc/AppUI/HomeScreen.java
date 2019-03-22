@@ -29,20 +29,20 @@ public class HomeScreen extends FragmentPagerAdapter
     @Override
     public Fragment getItem(int pos)
     {
-        switch(pos)
+        switch(pos) //Based on page number return the page
         {
-            case 0:
-                return MainMenu.newInstance();
-            case 1:
-                return SettingsPage.newInstance();
-            case 2:
-                return UsageStats.newInstance();
+            case 0: //First page to be loaded
+                return MainMenu.newInstance(); //Want main menu to be first
+            case 1: //Second page
+                return SettingsPage.newInstance(); //Settings is the second page
+            case 2: //Third page
+                return UsageStats.newInstance(); //Usage stats will be the third page
             default:
                 return null;
         }
     }
 
-    @Override
+    @Override //Return the title of the page to be in the top tab strip
     public CharSequence getPageTitle(int pos)
     {
         if(pos == 0)
