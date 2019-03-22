@@ -11,6 +11,12 @@ import android.widget.Switch;
 
 import com.example.raphael.tcc.R;
 
+/*
+    Android Battery Saver
+    baw76 Capstone Research Spring 2019
+    -This class is a fragment that handles the two buttons for settings. Can be expanded in future.
+ */
+
 public class SettingsPage extends Fragment
 {
     private Switch bbSwitch; //Will hold the reference to the switch dedicated to BubbleButton
@@ -61,12 +67,12 @@ public class SettingsPage extends Fragment
                 if(isChecked) //True if the switch has been set to 'On' position
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.ENABLE_NOTIFICATION");
-                    getContext().sendBroadcast(intent);
+                    getActivity().getApplicationContext().sendBroadcast(intent);
                 }
                 else //True if the switch is in the 'Off' position
                 {
                     Intent intent = new Intent("com.example.raphael.tcc.DISABLE_NOTIFICATION");
-                    getContext().sendBroadcast(intent);
+                    getActivity().getApplicationContext().sendBroadcast(intent);
                 }
             }
         });
