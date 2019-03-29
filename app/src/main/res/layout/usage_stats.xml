@@ -15,25 +15,9 @@
         android:textAppearance="@android:style/TextAppearance.Large"
         android:textSize="36sp" />
 
-    <LinearLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:baselineAligned="false">
-
-        <ListView
-            android:id="@+id/left_list"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:baselineAligned="false" />
-
-        <ListView
-            android:id="@+id/right_list"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

@@ -2,6 +2,8 @@ package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +22,9 @@ import java.util.ArrayList;
 
 public class UsageStats extends Fragment
 {
-    ListView leftList;
-    ListView rightList;
-    ArrayList leftArrayList;
-    ArrayList rightArrayList;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter recAdapter;
+    private RecyclerView.LayoutManager recManager;
 
     public static UsageStats newInstance()
     {
@@ -44,8 +45,11 @@ public class UsageStats extends Fragment
     {
         View newView = inflate.inflate(R.layout.usage_stats, container, false);
 
-        leftList = newView.findViewById(R.id.left_list);
-        rightList = newView.findViewById(R.id.right_list);
+        recyclerView = newView.findViewById(R.id.recyclerView);
+        recManager = new LinearLayoutManager(getActivity().getBaseContext());
+        recyclerView.setLayoutManager(recManager);
+        recAdapter =
+        recyclerView.setAdapter(recAdapter);
 
         return newView;
     }
