@@ -45,7 +45,7 @@ public class BackgroundService extends Service {
     private static int brightnessValue;
     private boolean notifEnabled;
     private boolean buttonEnabled;
-
+    private boolean init=true;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,6 +56,21 @@ public class BackgroundService extends Service {
     //TODO I think the algorithm is not saving correctly the changes of the user when the screen turns off
     //Todo the cause may be that flag screenOnOff doesnt have a if case when it is False
     public int onStartCommand(Intent intent, int flags, int startId) {
+        System.out.println("startCommand");
+        String value= intent.getStringExtra("inputChoise");
+        System.out.println(value);
+        if(init) {
+            if (value.equals("Notification")) {
+                notifEnabled = true;
+                init=false;
+                speedUpNotification.createSpeedUpNotification(this);
+            }
+            if (value.equals("BubbleButton")) {
+                buttonEnabled = true;
+                init=false;
+                bubbleButton.createFeedBackButton(getApplicationContext());
+            }
+        }
         super.onStartCommand(intent, flags, startId);
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -107,16 +122,20 @@ public class BackgroundService extends Service {
 
     @Override
     public void onCreate() {
+        System.out.println("Oncreate");
         super.onCreate();
-        //removed bubbleButton
-        //bubbleButton.createFeedBackButton(getApplicationContext());
+        if(buttonEnabled) {
+            bubbleButton.createFeedBackButton(getApplicationContext());
+        }
+        if(notifEnabled) {
+            speedUpNotification.createSpeedUpNotification(this);
+        }
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
         registerReceiver(broadcastRcv, filter);
 
-        //Create the notification
-        speedUpNotification.createSpeedUpNotification(this);
+
     }
 
 
@@ -127,9 +146,12 @@ public class BackgroundService extends Service {
         unregisterReceiver(broadcastRcv);
         scheduler.shutdown();
         cpuManager.giveAndroidFullControl();
-
-        speedUpNotification.removeNotification(this);
-        bubbleButton.removeView();
+        if(notifEnabled) {
+            speedUpNotification.removeNotification(this);
+        }
+        if(buttonEnabled) {
+            bubbleButton.removeView();
+        }
         stopService(new Intent(this, BackgroundService.class));
     }
 

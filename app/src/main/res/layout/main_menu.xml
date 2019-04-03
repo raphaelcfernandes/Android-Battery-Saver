@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="141dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:fontFamily="sans-serif-black"
         android:text="@string/main_menu"
@@ -15,9 +15,31 @@
         android:textAppearance="@android:style/TextAppearance.Large"
         android:textSize="36sp" />
 
+    <RadioGroup
+        android:id="@+id/input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/Not"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:checked="true"
+            android:gravity="center"
+            android:text="Notification" />
+
+        <RadioButton
+            android:id="@+id/Bub"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="BubbleButton" />
+    </RadioGroup>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="141dp"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingTop="10dp">
