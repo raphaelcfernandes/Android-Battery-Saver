@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.example.raphael.tcc.AppUI.ViewPagerFragments.SettingsPage;
 import com.example.raphael.tcc.AppUI.ViewPagerFragments.MainMenu;
 import com.example.raphael.tcc.AppUI.ViewPagerFragments.UsageStats;
-import com.example.raphael.tcc.R;
 
 //baw76 class to be the main screen and swipe tabs
 public class HomeScreen extends FragmentPagerAdapter
