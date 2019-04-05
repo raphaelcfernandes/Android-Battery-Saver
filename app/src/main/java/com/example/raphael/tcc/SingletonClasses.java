@@ -6,6 +6,7 @@ import com.example.raphael.tcc.Managers.CpuManager;
  * Created by rapha on 20-Oct-16.
  */
 
+
 public final class SingletonClasses {
     private static CpuManager instance = null;
     private SingletonClasses(){}
