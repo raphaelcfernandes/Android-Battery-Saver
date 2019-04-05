@@ -1,6 +1,7 @@
 package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
+import android.util.Log;
 
 import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SearchAlgorithms;
@@ -256,6 +257,7 @@ public final class CpuManager {
      * @param speed
      */
     private void writeSpeedOnCore(int core, int speed) {
+        Log.i(this.getClass().getName(), "writeSpeedOnCore: " + core + ", " + speed);
         StringBuilder path = new StringBuilder();
 
         if (speed != 0) {
@@ -320,30 +322,48 @@ public final class CpuManager {
         } else
             //i starts at 2 because index 0 represents the name of the running app
             //and index 1 represents the brightness level
-            for (i = 2, x = 0; i < arrayConfiguration.size(); i++, x++)
+            for (i = 2, x = 0; i < numberOfCores + 2; i++, x++)
                 //Write on core X the frequency represented by index i in arrayConfiguration
                 writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
     public ArrayList<Integer> setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
+        int core = speedConfiguration.size() - 1;
+        int speed = 0;
         outConfiguration:
         for (int i = speedConfiguration.size() - 1; i >= 0; i--) {
             //Write on core X the frequency represented by index i in arrayConfiguration
             for (int m = clockLevels[i].length - 1; m >= 0; m--) {
-                if (speedConfiguration.get(i) == 0) {
+                if (speedConfiguration.get(i) != 0) {
+                    if (currentClockLevel[i][2] == 1) {
+                        core = i;
+                        speed = 0;
+                        writeSpeedOnCore(i, 0);
+                    }
                     continue;
                 }
-                if (speedConfiguration.get(i) < clockLevels[i][0]) {
-                    turnCoreOnOff(i, true);
+                if (speedConfiguration.get(i) < clockLevels[i][0] && i != 0) {
                     speedConfiguration.set(i, 0);
+                    if (currentClockLevel[i][2] == 1) {
+                        core = i;
+                        speed = 0;
+                        writeSpeedOnCore(i, 0);
+                    }
                     break;
                 }
-                if (speedConfiguration.get(i) >= clockLevels[i].length) {
-                    writeSpeedOnCore(i, clockLevels[i][m]);
+                if (speedConfiguration.get(i) >= clockLevels[i][m]) {
+                    core = i;
+                    if (m > 0) {
+                        speed = clockLevels[i][m];
+                    } else {
+                        speed = clockLevels[i][0];
+                    }
+                    writeSpeedOnCore(core, speed);
                     break outConfiguration;
                 }
             }
         }
+
         return speedConfiguration;
     }
 
