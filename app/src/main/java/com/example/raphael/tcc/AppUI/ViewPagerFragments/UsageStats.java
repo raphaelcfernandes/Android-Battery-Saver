@@ -55,6 +55,7 @@ public class UsageStats extends Fragment
         recyclerView = newView.findViewById(R.id.recyclerView);
         recManager = new LinearLayoutManager(getActivity().getBaseContext());
         recyclerView.setLayoutManager(recManager);
+        getAppStats();
         recAdapter = new RecyclerAdapter(appStatsList);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(recAdapter);

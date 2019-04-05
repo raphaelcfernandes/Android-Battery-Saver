@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.raphael.tcc.AppUI.BubbleButton;
@@ -53,6 +54,8 @@ public class BackgroundService extends Service {
         return null;
     }
 
+    private ArrayList<Integer> currentspeeds;
+
     @Override
     //TODO I think the algorithm is not saving correctly the changes of the user when the screen turns off
     //Todo the cause may be that flag screenOnOff doesnt have a if case when it is False
@@ -61,6 +64,7 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                Log.i(this.getClass().getName(), "run: one");
                 if (screenOnOff) {
                     loadLastAppOnScreenOnOff = true;//Reload last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
@@ -78,18 +82,40 @@ public class BackgroundService extends Service {
                     if (!loaded) {//Retrieve app info from DB
                         //reload actualApp
                         arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
-                        if (!arrayList.isEmpty())
+                        if (!arrayList.isEmpty()) {
                             brightnessValue = Integer.parseInt(arrayList.get(1));
+                            cpuManager.adjustConfiguration(arrayList);
+                        } else {
+                            cpuManager.adjustConfiguration(new ArrayList<String>());
+                            currentspeeds = cpuManager.getArrayListCoresSpeed();
+                            for (int i = currentspeeds.size() - 1; i >= 0; i--) {
+                                if (currentspeeds.get(i) > 0) {
+                                    currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
+                                    Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
+                                    break;
+                                }
+                            }
+
+                        }
                         if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
                             if (changeDetector)
                                 appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
                             else if (firstTimeOnSystem)
                                 appDbHelper.insertAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
                         }
-                        setAppConfiguration(arrayList);
+                        //setAppConfiguration(arrayList);
                         loaded = true;
                         lastApp = actualApp;
                         changeDetector = false;
+                    } else {
+                        for (int i = currentspeeds.size() - 1; i >= 0; i--) {
+                            if (currentspeeds.get(i) > 0) {
+                                currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
+                                Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
+                                break;
+                            }
+                        }
+                        cpuManager.setSpeedByArrayListDESC(currentspeeds);
                     }
                 } else if (loadLastAppOnScreenOnOff) {//When the screen turn off, put all config to min.
                     loadLastAppOnScreenOnOff = false;
@@ -152,11 +178,9 @@ public class BackgroundService extends Service {
         }
     }
 
-    private final BroadcastReceiver broadcastRcv = new BroadcastReceiver()
-    {
+    private final BroadcastReceiver broadcastRcv = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             int value;
             if (action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")) {
