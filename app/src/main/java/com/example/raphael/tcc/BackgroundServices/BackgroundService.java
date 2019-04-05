@@ -63,7 +63,7 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Log.i(this.getClass().getName(), "run: one");
+                Log.i(this.getClass().getName(), "Running the thread");
                 if (screenOnOff) {
                     loadLastAppOnScreenOnOff = true;//Reload last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
@@ -81,12 +81,45 @@ public class BackgroundService extends Service {
                     if (!loaded) {//Retrieve app info from DB
                         //reload actualApp
                         arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
+                        //If got the app from the database
                         if (!arrayList.isEmpty()) {
                             brightnessValue = Integer.parseInt(arrayList.get(1));
                             cpuManager.adjustConfiguration(arrayList);
+                            //otherwise:
                         } else {
-                            cpuManager.adjustConfiguration(new ArrayList<String>());
-                            currentspeeds = cpuManager.getArrayListCoresSpeed();
+                            Log.i(this.getClass().getName(), "Did not get the app from db. ");
+                            if (currentspeeds.size() > 0) {
+                                for (int i = currentspeeds.size() - 1; i >= 0; i--) {
+                                    if (currentspeeds.get(i) > 0) {
+                                        currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
+                                        // Set the core with highest number to 0.95 of its value
+                                        Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
+                                        break;
+                                    }
+                                }
+                                currentspeeds = cpuManager.setSpeedByArrayListDESC(currentspeeds);
+                            }
+                            //Set to highest speed
+                            else {
+                                cpuManager.adjustConfiguration(new ArrayList<String>());
+                                currentspeeds = cpuManager.getArrayListCoresSpeed();
+                            }
+                        }
+                        if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
+                            if (changeDetector) {
+                                appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
+                                currentspeeds = new ArrayList<>();
+                            } else if (firstTimeOnSystem) {
+                                appDbHelper.insertAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
+                                currentspeeds = new ArrayList<>();
+                            }
+                        }
+                        //setAppConfiguration(arrayList);
+                        loaded = false;
+                        lastApp = actualApp;
+                        changeDetector = false;
+                    } else {
+                        if (currentspeeds.size() > 0) {
                             for (int i = currentspeeds.size() - 1; i >= 0; i--) {
                                 if (currentspeeds.get(i) > 0) {
                                     currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
@@ -94,27 +127,8 @@ public class BackgroundService extends Service {
                                     break;
                                 }
                             }
-
+                            cpuManager.setSpeedByArrayListDESC(currentspeeds);
                         }
-                        if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
-                            if (changeDetector)
-                                appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
-                            else if (firstTimeOnSystem)
-                                appDbHelper.insertAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
-                        }
-                        //setAppConfiguration(arrayList);
-                        loaded = true;
-                        lastApp = actualApp;
-                        changeDetector = false;
-                    } else {
-                        for (int i = currentspeeds.size() - 1; i >= 0; i--) {
-                            if (currentspeeds.get(i) > 0) {
-                                currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
-                                Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
-                                break;
-                            }
-                        }
-                        cpuManager.setSpeedByArrayListDESC(currentspeeds);
                     }
                 } else if (loadLastAppOnScreenOnOff) {//When the screen turn off, put all config to min.
                     loadLastAppOnScreenOnOff = false;
@@ -129,6 +143,13 @@ public class BackgroundService extends Service {
             }
         }, 1, 1, SECONDS);
         return START_NOT_STICKY;
+    }
+
+    //Once receive the request
+    public void levelup() {
+        currentspeeds.set(currentspeeds.size() - 1, (int) (currentspeeds.get(currentspeeds.size() - 1) * 1.10));
+        cpuManager.setSpeedByArrayListDESC(currentspeeds);
+        appDbHelper.updateAppConfiguration(actualApp, brightnessValue, cpuManager.getArrayListCoresSpeed());
     }
 
     @Override
@@ -178,7 +199,7 @@ public class BackgroundService extends Service {
             int value;
             if (action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")) {
                 value = intent.getIntExtra("valorCpuUsuario", 0);
-                cpuManager.setCpuSpeedFromUserInput(value);
+                levelup();
                 changeDetector = true;
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {

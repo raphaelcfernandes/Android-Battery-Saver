@@ -310,10 +310,13 @@ public final class CpuManager {
         //This means that default setup should be loaded
         //All cores but 0 are turned off
         //Core 0 frequency is set to be its middle frequency of all possible frequencies
+        //Set all cores to the highest speed.
         if (arrayConfiguration.size() == 0) {
-            for (i = 1; i < numberOfCores; i++)
-                turnCoreOnOff(i, false);
-            writeSpeedOnCore(0, clockLevels[0][((currentClockLevel[0][1]) / 2) + 1]);
+            for (i = 1; i < numberOfCores; i++) {
+                turnCoreOnOff(i, true);
+                //old one  ONLY WORKED ON THE CORE 0, NOT ALL CORES.
+                writeSpeedOnCore(i, clockLevels[i][clockLevels[i].length - 1]);
+            }
         } else
             //i starts at 2 because index 0 represents the name of the running app
             //and index 1 represents the brightness level
@@ -322,7 +325,7 @@ public final class CpuManager {
                 writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
-    public void setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
+    public ArrayList<Integer> setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
         outConfiguration:
         for (int i = speedConfiguration.size() - 1; i >= 0; i--) {
             //Write on core X the frequency represented by index i in arrayConfiguration
@@ -332,6 +335,7 @@ public final class CpuManager {
                 }
                 if (speedConfiguration.get(i) < clockLevels[i][0]) {
                     turnCoreOnOff(i, true);
+                    speedConfiguration.set(i, 0);
                     break;
                 }
                 if (speedConfiguration.get(i) >= clockLevels[i].length) {
@@ -340,6 +344,7 @@ public final class CpuManager {
                 }
             }
         }
+        return speedConfiguration;
     }
 
 
