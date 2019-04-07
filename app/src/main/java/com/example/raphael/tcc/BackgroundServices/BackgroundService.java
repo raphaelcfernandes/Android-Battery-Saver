@@ -20,6 +20,7 @@ import com.example.raphael.tcc.SingletonClasses;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -51,10 +52,11 @@ public class BackgroundService extends Service {
     private boolean buttonEnabled;
     private String TAG = this.getClass().getName();
     //New Variable
-    private static boolean screenOn = true, appChanged = false;
+    private static boolean screenOn = true, appChanged = false, speedSet = false;
     private String currentApp;
     private HashMap<String, Stack<ArrayList<Integer>>> pastStatus = new HashMap<>();
     private HashMap<String, Boolean> getFromDb = new HashMap<>();
+    private final static String[] exclusiveApps = {"com.android.launcher", "com.google.android.googlequicksearchbox", "com.example.raphael.tcc", "com.android.systemui", "android"};
 
     @Nullable
     @Override
@@ -62,57 +64,117 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    private List<String> currentSpeeds;
-    private List<String> currentThresholds;
+    private List<Integer> currentSpeeds;
+    private List<Integer> currentThresholds;
 
-    public int onStartCommandVersionTwo(Intent intent, int flags, int startId) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-
                 Log.i(TAG, "The Thread start to Running.");
+                //If screenOnOff is off, the thread will be return;
+                if (!screenOnOff) {
+                    return;
+                }
                 //If screen is on
                 if (screenOn) {
                     //Get the App Current Running
                     currentApp = appManager.getAppRunningOnForeground(BackgroundService.this);
-                    if (!currentApp.equals(lastApp)) {
-                        appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<Integer>(CpuManager.getNumberOfCores()));
+                    // If the app changed, we will save the current settings.
+                    if (!currentApp.equals(lastApp) && !lastApp.isEmpty()) {
+
+                        //TODO: The appmanager cannot get current running package name. It returns empty values.
+                        //TODO: It looks like it CANNOT get the current STATS.
+                        appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+                        boolean isExclusiveApp = Arrays.asList(exclusiveApps).contains(currentApp);
+                        if (!isExclusiveApp) {
+                            lastApp = currentApp;
+                        }
                     }
-                    if (currentApp.isEmpty()) {
-                        lastApp = currentApp;
-                    }
-                    ArrayList<String> appData = appDbHelper.getAppData(cpuManager.getSumNumberCore(), currentApp);
-                    //If the current app did not exist in the data base
-                    if (appData == null || appData.size() == 0) {
-                        Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
-                        Log.i(TAG, "Init the new App");
-                        //Set the CPU to the highest frequency.
-                        cpuManager.adjustConfiguration(new ArrayList<String>());
-                        //Get current speed and push to the stack to save the current status
-                        ArrayList curSpeed = cpuManager.getArrayListCoresSpeed();
-                    } else {
-                        Log.i(TAG, "The current app " + currentApp + " exist in the database");
-                        Log.i(TAG, "Setting the configuration based on the database");
-                        //If there is a configuration from database, set the system based on the configuration
-                        brightnessValue = Integer.parseInt(appData.get(1));
-                        cpuManager.adjustConfiguration(appData);
-                        currentSpeeds = appData.subList(2, 2 + CpuManager.getNumberOfCores());
-                        currentThresholds = appData.subList(2 + CpuManager.getNumberOfCores(), appData.size());
-                        //Frequency based on the previous saved data
+                    // Update the last app to current app.
+                    else {
+                        //Retrieve app form data base
+                        ArrayList<String> appData = appDbHelper.getAppData(cpuManager.getSumNumberCore(), currentApp);
+                        //If the current app did not exist in the data base
+                        if (appData == null || appData.size() == 0) {
+                            Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
+                            Log.i(TAG, "Init the new App");
+                            //Set the CPU to the highest frequency.
+                            cpuManager.adjustConfiguration(new ArrayList<>());
+                            currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                            currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
+                        } else {
+                            Log.i(TAG, "The current app " + currentApp + " exist in the database");
+                            Log.i(TAG, "Setting the configuration based on the database");
+                            //If there is a configuration from database, set the system based on the configuration
+                            brightnessValue = Integer.parseInt(appData.get(1));
+                            cpuManager.adjustConfiguration(appData);
+                            currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                            currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
+                            //Frequency based on the previous saved data
+                        }
+                        //If we already have the threshold
+                        if (currentSpeeds.size() == currentThresholds.size()) {
+                            for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                if (currentSpeeds.get(i) > 0) {
+                                    if (currentSpeeds.get(i) < currentThresholds.get(i))
+                                        if ((currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * 0.75)) >= currentThresholds.get(i)) {
+                                            currentSpeeds.set(i, (int) (currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * 0.75)));
+                                        }
+                                    Log.e(this.getClass().getName(), "current speed: " + i + ", " + (currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * 0.75)));
+                                    break;
+                                }
+                            }
+                            currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                        } else {
+                            // If this a new app, decrease the speed by the plan.
+                            for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                if (currentSpeeds.get(i) > 0) {
+                                    currentSpeeds.set(i, (int) (currentSpeeds.get(i) * 0.75));
+                                    Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                    break;
+                                }
+                            }
+                            currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                        }
                     }
                 }
                 //Once the screen is off, save the last status and set it to the lowest frequency
                 else {
-                    appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<Integer>(CpuManager.getNumberOfCores()));
+                    // If we have thresholds, we save the threshold, otherwise, we save the current settings.
+                    appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+                    //Once we saved the threshold and current speed and threshold, we set screenOn to true to avoid save it again.
+                    //Also, we will use another parameter to detect weather screen is on or not.
                     screenOn = true;
+                    screenOnOff = false;
+                    //TODO: Set to min speed
                 }
+
+                Log.i(TAG, "The Thread Finished Running.");
             }
+
         };
         scheduler.scheduleAtFixedRate(runnable, 1, 2, SECONDS);
         return START_NOT_STICKY;
     }
 
-    @Override
+    private List<Integer> getIntegerArray(List<String> stringArray) {
+        List<Integer> result = new ArrayList<Integer>();
+        for (String stringValue : stringArray) {
+            try {
+                //Convert String to Integer, and store it into integer array list.
+                result.add(Integer.parseInt(stringValue));
+            } catch (NumberFormatException nfe) {
+                //System.out.println("Could not parse " + nfe);
+                Log.w("NumberFormat", "Parsing failed! " + stringValue + " can not be an integer");
+            }
+        }
+        return result;
+    }
+
+    /*@Override
     //TODO I think the algorithm is not saving correctly the changes of the user when the screen turns off
     //Todo the cause may be that flag screenOnOff doesnt have a if case when it is False
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -194,13 +256,12 @@ public class BackgroundService extends Service {
 
         }, 1, 3, SECONDS);
         return START_NOT_STICKY;
-    }
+    }*/
 
     //Once receive the request
     public void levelup() {
-        currentSpeeds.set(currentSpeeds.size() - 1, (int) (currentSpeeds.get(currentSpeeds.size() - 1) * 1.10));
-        cpuManager.setSpeedByArrayListDESC(currentSpeeds);
-        appDbHelper.updateAppConfiguration(actualApp, brightnessValue, cpuManager.getArrayListCoresSpeed());
+
+
     }
 
     @Override
@@ -255,7 +316,6 @@ public class BackgroundService extends Service {
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 //changeDetector = false;
-                screenOnOff = false;
                 screenOn = false;
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {

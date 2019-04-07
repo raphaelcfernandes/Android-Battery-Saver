@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public final class CpuManager {
@@ -314,7 +315,7 @@ public final class CpuManager {
         //Core 0 frequency is set to be its middle frequency of all possible frequencies
         //Set all cores to the highest speed.
         if (arrayConfiguration.size() == 0) {
-            for (i = 1; i < numberOfCores; i++) {
+            for (i = 0; i < numberOfCores; i++) {
                 turnCoreOnOff(i, true);
                 //old one  ONLY WORKED ON THE CORE 0, NOT ALL CORES.
                 writeSpeedOnCore(i, clockLevels[i][clockLevels[i].length - 1]);
@@ -327,17 +328,15 @@ public final class CpuManager {
                 writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
-    public ArrayList<Integer> setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
-        int core = speedConfiguration.size() - 1;
+    public List<Integer> setSpeedByArrayListDESC(List<Integer> speedConfiguration) {
+        int core = speedConfiguration.size();
         int speed = 0;
         outConfiguration:
-        for (int i = speedConfiguration.size() - 1; i >= 0; i--) {
+        for (int i = numberOfCores - 1; i >= 0; i--) {
             //Write on core X the frequency represented by index i in arrayConfiguration
             for (int m = clockLevels[i].length - 1; m >= 0; m--) {
                 if (speedConfiguration.get(i) != 0) {
                     if (currentClockLevel[i][2] == 1) {
-                        core = i;
-                        speed = 0;
                         writeSpeedOnCore(i, 0);
                     }
                     continue;
@@ -345,8 +344,8 @@ public final class CpuManager {
                 if (speedConfiguration.get(i) < clockLevels[i][0] && i != 0) {
                     speedConfiguration.set(i, 0);
                     if (currentClockLevel[i][2] == 1) {
-                        core = i;
-                        speed = 0;
+
+
                         writeSpeedOnCore(i, 0);
                     }
                     break;

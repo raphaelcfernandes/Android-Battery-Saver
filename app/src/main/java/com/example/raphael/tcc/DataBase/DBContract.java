@@ -34,14 +34,13 @@ public class DBContract extends Activity {
             int i;
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("CREATE TABLE " + TABLE_NAME + " (" + APP_NAME + " TEXT PRIMARY KEY," + COLUMN_BRIGHTNESS + INT_TYPE + COMMA_SEP);
-            int cores = cpuManager.getSumNumberCore();
-            for (i = 0; i < cpuManager.getNumberOfCores(); i++) {
-                stringBuilder.append(COLUMN_CORE + i + INT_TYPE + COMMA_SEP);
+            for (i = 0; i < CpuManager.getNumberOfCores(); i++) {
+                stringBuilder.append(COLUMN_CORE).append(i).append(INT_TYPE).append(COMMA_SEP);
 
             }
             //Second For loop to avoid conflict with old methods.
-            for (i = 0; i < cpuManager.getNumberOfCores(); i++) {
-                stringBuilder.append(THRESHOLD + i + INT_TYPE + COMMA_SEP);
+            for (i = 0; i < CpuManager.getNumberOfCores(); i++) {
+                stringBuilder.append(THRESHOLD).append(i).append(INT_TYPE).append(COMMA_SEP);
 
             }
             stringBuilder.setCharAt(stringBuilder.length() - 1, ')');

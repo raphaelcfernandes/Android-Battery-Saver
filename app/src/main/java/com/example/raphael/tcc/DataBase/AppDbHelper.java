@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rapha on 26-Sep-16.
@@ -35,7 +36,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, ArrayList<Integer> thresholds) {
+    public void insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.APP_NAME, APP_NAME);
@@ -74,7 +75,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
         return arrayList;
     }
 
-    public void updateAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, ArrayList<Integer> thresholds) {
+    public void updateAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
         if (!CheckIsDataAlreadyInDBorNot(APP_NAME))
             insertAppConfiguration(APP_NAME, brightnessLevel, cpuSpeed, thresholds);
         else {

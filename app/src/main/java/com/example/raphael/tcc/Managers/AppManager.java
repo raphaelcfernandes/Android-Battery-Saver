@@ -32,22 +32,24 @@ public class AppManager {
         return usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+    @TargetApi(Build.VERSION_CODES.M)
     @SuppressWarnings("ResourceType")
     private UsageStatsManager getUsageStatsManager(Context context) {
         return (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
     }
+    @TargetApi(Build.VERSION_CODES.M)
     private String getProcessName(List<UsageStats> stats) {
         String foregroundProcess = "";
             if(stats != null) {
-                SortedMap<Long,UsageStats> mySortedMap = new TreeMap<Long,UsageStats>();
+                SortedMap<Long,UsageStats> mySortedMap = new TreeMap<>();
                 for (UsageStats usageStats : stats) {
                     mySortedMap.put(usageStats.getLastTimeUsed(),usageStats);
                 }
-                if(mySortedMap != null && !mySortedMap.isEmpty()) {
+                if(!mySortedMap.isEmpty()) {
                     foregroundProcess = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
                 }
             }
         return foregroundProcess;
     }
+
 }
