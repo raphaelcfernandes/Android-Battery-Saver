@@ -54,8 +54,7 @@ public class BackgroundService extends Service {
     //New Variable
     private static boolean screenOn = true, appChanged = false, speedSet = false;
     private String currentApp;
-    private HashMap<String, Stack<ArrayList<Integer>>> pastStatus = new HashMap<>();
-    private HashMap<String, Boolean> getFromDb = new HashMap<>();
+
     private final static String[] exclusiveApps = {"com.android.launcher", "com.google.android.googlequicksearchbox", "com.example.raphael.tcc", "com.android.systemui", "android"};
 
     @Nullable
@@ -64,8 +63,8 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    private List<Integer> currentSpeeds;
-    private List<Integer> currentThresholds;
+    private static List<Integer> currentSpeeds;
+    private static List<Integer> currentThresholds;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -96,7 +95,7 @@ public class BackgroundService extends Service {
                     // Update the last app to current app.
                     else {
                         //Retrieve app form data base
-                        ArrayList<String> appData = appDbHelper.getAppData(cpuManager.getSumNumberCore(), currentApp);
+                        ArrayList<String> appData = appDbHelper.getAppData(CpuManager.getNumberOfCores(), currentApp);
                         //If the current app did not exist in the data base
                         if (appData == null || appData.size() == 0) {
                             Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
@@ -105,18 +104,21 @@ public class BackgroundService extends Service {
                             cpuManager.adjustConfiguration(new ArrayList<>());
                             currentSpeeds = cpuManager.getArrayListCoresSpeed();
                             currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
+                            appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
                         } else {
                             Log.i(TAG, "The current app " + currentApp + " exist in the database");
                             Log.i(TAG, "Setting the configuration based on the database");
                             //If there is a configuration from database, set the system based on the configuration
-                            brightnessValue = Integer.parseInt(appData.get(1));
-                            cpuManager.adjustConfiguration(appData);
-                            currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                            if (!speedSet) {
+                                brightnessValue = Integer.parseInt(appData.get(1));
+                                cpuManager.adjustConfiguration(appData);
+                                currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                            }
                             currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
                             //Frequency based on the previous saved data
                         }
                         //If we already have the threshold
-                        if (currentSpeeds.size() == currentThresholds.size()) {
+                        if (currentThresholds.size() > 0) {
                             for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
                                 if (currentSpeeds.get(i) > 0) {
                                     if (currentSpeeds.get(i) < currentThresholds.get(i))
@@ -128,6 +130,7 @@ public class BackgroundService extends Service {
                                 }
                             }
                             currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                            speedSet = true;
                         } else {
                             // If this a new app, decrease the speed by the plan.
                             for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
@@ -138,6 +141,8 @@ public class BackgroundService extends Service {
                                 }
                             }
                             currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                            speedSet = true;
+
                         }
                     }
                 }

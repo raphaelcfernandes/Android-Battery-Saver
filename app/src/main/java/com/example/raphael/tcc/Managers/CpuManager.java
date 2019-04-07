@@ -335,7 +335,7 @@ public final class CpuManager {
         for (int i = numberOfCores - 1; i >= 0; i--) {
             //Write on core X the frequency represented by index i in arrayConfiguration
             for (int m = clockLevels[i].length - 1; m >= 0; m--) {
-                if (speedConfiguration.get(i) != 0) {
+                if (speedConfiguration.get(i) == 0) {
                     if (currentClockLevel[i][2] == 1) {
                         writeSpeedOnCore(i, 0);
                     }
@@ -344,8 +344,6 @@ public final class CpuManager {
                 if (speedConfiguration.get(i) < clockLevels[i][0] && i != 0) {
                     speedConfiguration.set(i, 0);
                     if (currentClockLevel[i][2] == 1) {
-
-
                         writeSpeedOnCore(i, 0);
                     }
                     break;

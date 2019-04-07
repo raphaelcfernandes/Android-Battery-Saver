@@ -1,8 +1,10 @@
 package com.example.raphael.tcc.AppUI;
 
+import android.content.Intent;
 import android.os.Bundle;
 import com.example.raphael.tcc.R;
 
+import android.provider.Settings;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +27,8 @@ public class MainActivity extends AppCompatActivity
         ViewPager viewPager = findViewById(R.id.viewPager); //Set new view pager
         fpa = new HomeScreen(getSupportFragmentManager());
         viewPager.setAdapter(fpa);
-
+        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        this.startActivity(intent);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() //Tells if the user swipes pages
         {
             @Override

@@ -43,8 +43,11 @@ public class AppDbHelper extends SQLiteOpenHelper {
         contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
         for (int x = 0; x < cpuSpeed.size(); x++) {
             contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE + x, cpuSpeed.get(x));
+        }
+        for (int x = 0; x < thresholds.size(); x++) {
             contentValues.put(DBContract.APP_DATABASE.THRESHOLD + x, thresholds.get(x));
         }
+        System.out.println(contentValues.size());
         db.insert(DBContract.APP_DATABASE.TABLE_NAME, null, contentValues);
     }
 
