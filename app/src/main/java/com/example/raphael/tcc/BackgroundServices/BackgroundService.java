@@ -130,7 +130,7 @@ public class BackgroundService extends Service {
                                                     speedSet = true;
                                                     break;
                                                 }
-                                            Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                            Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
                                         }
                                     }
 
@@ -139,7 +139,7 @@ public class BackgroundService extends Service {
                                     for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
                                         if (currentSpeeds.get(i) > 0) {
                                             currentSpeeds.set(i, (int) (currentSpeeds.get(i) * THRESHOLD));
-                                            Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                            Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
                                             break;
                                         }
                                     }
@@ -154,7 +154,7 @@ public class BackgroundService extends Service {
                         // If we have thresholds, we save the threshold, otherwise, we save the current settings.
                         if (currentThresholds == null || currentThresholds.size() == 0) {
                             appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<>(CpuManager.getNumberOfCores()));
-                        }else{
+                        } else {
                             appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
                         }
 
@@ -168,7 +168,7 @@ public class BackgroundService extends Service {
                     }
                     Log.i(TAG, "The Thread Finished Running.");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
                 }
             }
         };
