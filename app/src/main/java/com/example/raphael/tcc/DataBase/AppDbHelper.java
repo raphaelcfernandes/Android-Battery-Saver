@@ -71,8 +71,13 @@ public class AppDbHelper extends SQLiteOpenHelper {
         if (res.moveToFirst()) {
             arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.APP_NAME)));
             arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS)));
-            for (int x = 0; x < numberOfCores; x++)
+            for (int x = 0; x < numberOfCores; x++) {
                 arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_CORE + x)));
+            }
+            for (int x = 0; x < numberOfCores; x++) {
+                arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.THRESHOLD + x)));
+            }
+
         }
         res.close();
         return arrayList;
@@ -87,9 +92,11 @@ public class AppDbHelper extends SQLiteOpenHelper {
             contentValues.put(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS, brightnessLevel);
             for (int x = 0; x < cpuSpeed.size(); x++) {
                 contentValues.put(DBContract.APP_DATABASE.COLUMN_CORE + x, cpuSpeed.get(x));
+
+            }
+            for (int x = 0; x < thresholds.size(); x++) {
                 contentValues.put(DBContract.APP_DATABASE.THRESHOLD + x, thresholds.get(x));
             }
-
             db.update(DBContract.APP_DATABASE.TABLE_NAME, contentValues, "APP_NAME = ? ", new String[]{APP_NAME});
         }
     }

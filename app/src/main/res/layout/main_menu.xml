@@ -30,6 +30,13 @@
             android:text="@string/activate" />
 
         <Button
+            android:id="@+id/request"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/request" />
+
+        <Button
             android:id="@+id/deactivate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -27,7 +27,7 @@ public class SpeedUpNotification
     public void createSpeedUpNotification(Context context)
     {
         //Notification sends this on press
-        PendingIntent pendingSpeedUpIntent = PendingIntent.getActivity(context, 0, speedUpIntent, 0);
+        PendingIntent pendingSpeedUpIntent = PendingIntent.getBroadcast(context, 0, speedUpIntent, 0);
 
         NotificationCompat.Builder speedUpBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_speedup_image) //Notification image
