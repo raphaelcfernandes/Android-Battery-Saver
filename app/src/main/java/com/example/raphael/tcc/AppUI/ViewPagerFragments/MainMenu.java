@@ -1,6 +1,10 @@
 package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
+import android.app.AppOpsManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
@@ -20,7 +24,7 @@ import com.example.raphael.tcc.R;
 
 public class MainMenu extends Fragment {
     private Button activate; //Set variables to hold the two buttons
-    private Button request;
+
     private Button deactivate;
 
     public static MainMenu newInstance() {
@@ -40,7 +44,6 @@ public class MainMenu extends Fragment {
         View newView = inflate.inflate(R.layout.main_menu, container, false); //Set up container
         activate = newView.findViewById(R.id.activate); //Get the layouts from R
         deactivate = newView.findViewById(R.id.deactivate);
-        request = newView.findViewById(R.id.request);
         //Detects the click for the activate button
         activate.setOnClickListener(view -> {
             activate.setEnabled(false); //No repeat presses of activate
@@ -54,11 +57,6 @@ public class MainMenu extends Fragment {
             deactivate.setEnabled(false); //No repeat press of deactivate
             getActivity().stopService(new Intent(getActivity(), BackgroundService.class)); //Stop background
         });
-        request.setOnClickListener(view -> {
-            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-            startActivity(intent);
-        });
-
         return newView;
     }
 }
