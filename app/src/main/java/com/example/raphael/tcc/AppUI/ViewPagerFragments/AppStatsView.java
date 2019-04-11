@@ -2,12 +2,29 @@ package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
 import java.util.ArrayList;
 
+/*
+    Android Battery Saver
+    baw76@pitt.edu CS1980 Capstone
+    -This class holds the values for a single application on the system
+ */
+
 public class AppStatsView
 {
     private String appName;
     private int brightness;
     private int core_speed1, core_speed2, core_speed3, core_speed4;
 
+    public AppStatsView(String name, int bright, int cs1, int cs2, int cs3, int cs4)
+    {
+        appName = name;
+        brightness = bright;
+        core_speed1 = cs1;
+        core_speed2 = cs2;
+        core_speed3 = cs3;
+        core_speed4 = cs4;
+    }
+
+    //Previously used to use getAppData; new system makes it unnecessary
     public AppStatsView(ArrayList<String> statsFromDB)
     {
         appName = statsFromDB.get(0);

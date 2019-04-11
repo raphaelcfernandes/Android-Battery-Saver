@@ -1,5 +1,6 @@
 package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
+import java.util.ArrayList;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,7 +10,11 @@ import android.widget.TextView;
 
 import com.example.raphael.tcc.R;
 
-import java.util.ArrayList;
+/*
+    Android Battery Saver
+    baw76@pitt.edu CS1980 Capstone
+    -This class handles the communication between the individual AppStats and the View on screen
+ */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
 {
@@ -35,7 +40,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
     }
 
-    private ArrayList<AppStatsView> appViews;
+    private ArrayList<AppStatsView> appViews; //List of all the apps on the system and their data
     public RecyclerAdapter(ArrayList<AppStatsView> apps)
     {
         appViews = apps;
@@ -53,16 +58,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         return viewHolder;
     }
 
-    @Override
+    @Override //Add all the appropriate values to the holder
     public void onBindViewHolder(RecyclerAdapter.ViewHolder viewHolder, int position)
     {
         AppStatsView app = appViews.get(position);
         viewHolder.appTitle.setText(app.getAppName());
-        viewHolder.brightness.setText(app.getBrightness());
-        viewHolder.cpuFreq1.setText(app.getCoreSpeed1());
-        viewHolder.cpuFreq2.setText(app.getCoreSpeed2());
-        viewHolder.cpuFreq3.setText(app.getCoreSpeed3());
-        viewHolder.cpuFreq4.setText(app.getCoreSpeed4());
+        viewHolder.brightness.setText(Integer.toString(app.getBrightness()));
+        viewHolder.cpuFreq1.setText(Integer.toString(app.getCoreSpeed1()));
+        viewHolder.cpuFreq2.setText(Integer.toString(app.getCoreSpeed2()));
+        viewHolder.cpuFreq3.setText(Integer.toString(app.getCoreSpeed3()));
+        viewHolder.cpuFreq4.setText(Integer.toString(app.getCoreSpeed4()));
     }
 
     @Override

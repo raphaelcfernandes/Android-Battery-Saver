@@ -135,21 +135,18 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //removed bubbleButton
-        //bubbleButton.createFeedBackButton(getApplicationContext());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
         registerReceiver(broadcastRcv, filter);
-        /*
-        SharedPreferences sharedPreferences = getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
-        boolean bbButton = sharedPreferences.getBoolean("bubble_button", false);
-        boolean notif = sharedPreferences.getBoolean("notification", false);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+        buttonEnabled = sharedPreferences.getBoolean("bubble_button", false);
+        notifEnabled = sharedPreferences.getBoolean("notification", false);
 
-        if(bbButton)
-            bubbleButton.createFeedBackButton(this);
-        if(notif)
-            speedUpNotification.createSpeedUpNotification(this);*/
+        if(buttonEnabled)
+            bubbleButton.createFeedBackButton(getApplicationContext());
+        if(notifEnabled)
+            speedUpNotification.createSpeedUpNotification(getApplicationContext());
     }
 
 

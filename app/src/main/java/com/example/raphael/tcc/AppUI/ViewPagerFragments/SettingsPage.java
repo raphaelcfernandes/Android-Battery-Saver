@@ -26,8 +26,8 @@ public class SettingsPage extends Fragment
 
     public static SettingsPage newInstance()
     {
-        Bundle args = new Bundle();
         SettingsPage instance = new SettingsPage();
+        Bundle args = new Bundle();
         instance.setArguments(args);
         return instance;
     }
@@ -48,18 +48,20 @@ public class SettingsPage extends Fragment
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
             {
                 if(isChecked)
-                {/*
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                {
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean("bubble_button", true);
-                    editor.apply();*/
+                    editor.apply();
                 }
                 else
-                {/*
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                {
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean("bubble_button", false);
-                    editor.apply();*/
+                    editor.apply();
                 }
 
             }
@@ -71,18 +73,20 @@ public class SettingsPage extends Fragment
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
             {
                 if(isChecked) //True if the switch has been set to 'On' position
-                {/*
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                {
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean("notification", true);
-                    editor.apply();*/
+                    editor.apply();
                 }
                 else //True if the switch is in the 'Off' position
-                {/*
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                {
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean("notification", false);
-                    editor.apply();*/
+                    editor.apply();
                 }
             }
         });
