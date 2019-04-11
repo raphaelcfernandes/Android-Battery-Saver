@@ -1,6 +1,8 @@
 package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,8 +26,8 @@ public class SettingsPage extends Fragment
 
     public static SettingsPage newInstance()
     {
-        Bundle args = new Bundle();
         SettingsPage instance = new SettingsPage();
+        Bundle args = new Bundle();
         instance.setArguments(args);
         return instance;
     }
@@ -47,13 +49,19 @@ public class SettingsPage extends Fragment
             {
                 if(isChecked)
                 {
-                    Intent intent = new Intent("com.example.raphael.tcc.ENABLE_BUTTON");
-                    getActivity().sendBroadcast(intent);
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("bubble_button", true);
+                    editor.apply();
                 }
                 else
                 {
-                    Intent intent = new Intent("com.example.raphael.tcc.DISABLE_BUTTON");
-                    getActivity().sendBroadcast(intent);
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("bubble_button", false);
+                    editor.apply();
                 }
 
             }
@@ -66,13 +74,19 @@ public class SettingsPage extends Fragment
             {
                 if(isChecked) //True if the switch has been set to 'On' position
                 {
-                    Intent intent = new Intent("com.example.raphael.tcc.ENABLE_NOTIFICATION");
-                    getActivity().sendBroadcast(intent);
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("notification", true);
+                    editor.apply();
                 }
                 else //True if the switch is in the 'Off' position
                 {
-                    Intent intent = new Intent("com.example.raphael.tcc.DISABLE_NOTIFICATION");
-                    getActivity().sendBroadcast(intent);
+                    Context context = getActivity().getBaseContext();
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("notification", false);
+                    editor.apply();
                 }
             }
         });

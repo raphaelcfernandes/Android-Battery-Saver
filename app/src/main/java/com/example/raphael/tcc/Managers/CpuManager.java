@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 public final class CpuManager {
     private static int numberOfCores;
     private String pathCPU = "/sys/devices/system/cpu/cpu";
+
+
     /**
      * This variable stores each row as core number and each column the possible frequency from lowest to highest
      * Suppose you have two available cores with 10 speed each, then this matrix will be [2][10]:
@@ -31,22 +33,25 @@ public final class CpuManager {
     private static int amountOfValuesPerCore = 0;
     private static boolean isClockLevelsFilled = false;
 
-    public CpuManager(){
+    public static int[][] getClockLevels() {
+        return clockLevels;
+    }
+
+    public CpuManager() {
         /**
-        *   The constructor is responsible to identify how many cores the Smartphone has.
-        *   Then, the matrices of each core should be filled.
-        */
-        if(Build.VERSION.SDK_INT>=17){
+         *   The constructor is responsible to identify how many cores the Smartphone has.
+         *   Then, the matrices of each core should be filled.
+         */
+        if (Build.VERSION.SDK_INT >= 17) {
             numberOfCores = Runtime.getRuntime().availableProcessors();
-        }
-        else {
+        } else {
             numberOfCores = new File("/sys/devices/system/cpu/").listFiles(new FileFilter() {
-                public boolean accept(File params){
+                public boolean accept(File params) {
                     return Pattern.matches("cpu[0-9]", params.getName());
                 }
             }).length;
         }
-        if(!isClockLevelsFilled) {
+        if (!isClockLevelsFilled) {
             isClockLevelsFilled = true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
@@ -56,24 +61,25 @@ public final class CpuManager {
 
     /**
      * Method responsible for finding the default governor in the smartphone
+     *
      * @return interactive governor if the smartphone has it, or return default ondemand
      */
-    private String getDefaultGovernor(){
+    private String getDefaultGovernor() {
         String line = "";
         try {
-            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[] {"su", "-c", "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"}));
+            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[]{"su", "-c", "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"}));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(String a : line.split("[ \t]")){
-            if(a.equals("interactive")) {
+        for (String a : line.split("[ \t]")) {
+            if (a.equals("interactive")) {
                 return a;
             }
         }
         return "ondemand";
     }
 
-    public static int getNumberOfCores(){
+    public static int getNumberOfCores() {
         return numberOfCores;
     }
 
@@ -86,14 +92,14 @@ public final class CpuManager {
         stopMpDecision();
         //Turn on cores to read their clock levels
         for (int i = 0; i < numberOfCores; ++i) {
-            if(i!=0)
+            if (i != 0)
                 turnCoreOnOff(i, true);
             //Set userspace on the cores so one can write the configuration into cpu files
             echoUserSpace(i);
             //Fill the matrix of clockLevels
             fillClockLevelMatrix(i);
             //Set Min and Max Freq based on ClockLevelMatrix
-            if(i!=0)
+            if (i != 0)
                 turnCoreOnOff(i, false);
         }
     }
@@ -102,12 +108,12 @@ public final class CpuManager {
         StringBuilder path = new StringBuilder();
         try {
             path.setLength(0);
-            path.append("echo "+clockLevels[core][clockLevels[core].length-1]+ " > " + pathCPU + core +"/cpufreq/scaling_max_freq");
-            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+            path.append("echo " + clockLevels[core][clockLevels[core].length - 1] + " > " + pathCPU + core + "/cpufreq/scaling_max_freq");
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
             path.setLength(0);
-            path.append("echo "+clockLevels[core][0]+ " > " + pathCPU +  core + "/cpufreq/scaling_min_freq");
-            proc = Runtime.getRuntime().exec(new String[]{"su", "-c",path.toString()});
+            path.append("echo " + clockLevels[core][0] + " > " + pathCPU + core + "/cpufreq/scaling_min_freq");
+            proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -126,8 +132,8 @@ public final class CpuManager {
             StringBuilder path = new StringBuilder();
             try {
                 path.setLength(0);
-                path.append("echo " +  getDefaultGovernor() + " > " + pathCPU + i + "/cpufreq/scaling_governor");
-                Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
+                path.append("echo " + getDefaultGovernor() + " > " + pathCPU + i + "/cpufreq/scaling_governor");
+                Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
                 path.setLength(0);
             } catch (IOException | InterruptedException e) {
@@ -148,9 +154,9 @@ public final class CpuManager {
      * Self-explanotory method. This will turn off the Qualcomm mpdecision
      * Mpdecision: https://elementalx.org/the-truth-about-kernels-and-battery-life/
      */
-    private void stopMpDecision(){
+    private void stopMpDecision() {
         String stopMpDecision = "stop mpdecision";
-        try{
+        try {
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
         } catch (InterruptedException | IOException e) {
@@ -161,14 +167,15 @@ public final class CpuManager {
     /**
      * Self-explanotory method. It will write in the cpu scaling_governor "userspace"
      * so UImpatience can take control of the specific core.
+     *
      * @param core
      */
-    private void echoUserSpace(int core){
+    private void echoUserSpace(int core) {
         StringBuilder path = new StringBuilder();
         try {
             path.setLength(0);
-            path.append("echo userspace > "+pathCPU+core+"/cpufreq/scaling_governor");
-            Process proc = Runtime.getRuntime().exec(new String[]{"su","-c",path.toString()});
+            path.append("echo userspace > " + pathCPU + core + "/cpufreq/scaling_governor");
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
             path.setLength(0);
         } catch (IOException | InterruptedException e) {
@@ -177,14 +184,14 @@ public final class CpuManager {
     }
 
     /**
-     * @param core in respect to which core will be turned on/off
+     * @param core  in respect to which core will be turned on/off
      * @param state True if you want to turn on, False otherwise
-     * This method will turn on the core and update its currentClockLevel[core][2] to 1 or 0 based on @param state
+     *              This method will turn on the core and update its currentClockLevel[core][2] to 1 or 0 based on @param state
      */
-    private void turnCoreOnOff(int core, boolean state){
+    private void turnCoreOnOff(int core, boolean state) {
         //True to turn on Core
         StringBuilder path = new StringBuilder();
-        if(state) {//Turn on
+        if (state) {//Turn on
             try {
                 path.setLength(0);
                 //Write in the CPU file 1 indicating the core should be turned on
@@ -195,12 +202,11 @@ public final class CpuManager {
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-        else{
+        } else {
             try {//Turn Off
                 path.setLength(0);
                 //Write in the CPU file 1 indicating the core should be turned off
-                path.append("echo 0 > " + pathCPU + core+"/online");
+                path.append("echo 0 > " + pathCPU + core + "/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
                 //Update column 2 related to the core state (on/off)
@@ -215,27 +221,28 @@ public final class CpuManager {
 
     /**
      * For each @param core this method will fill up the matrix of available frequencies for each core
+     *
      * @param core
      */
-    private void fillClockLevelMatrix(int core){
+    private void fillClockLevelMatrix(int core) {
         String line;
         String[] levels;
         int x;
         try {
             //This return a list of frequencies as: F1 F2 F3 ... Fn
-            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[] {"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"}));
+            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[]{"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"}));
             levels = line.split("[ \t]");
             clockLevels[core] = new int[levels.length];
             //Set how many different frequencies this core has
             currentClockLevel[core][1] = levels.length;
             amountOfValuesPerCore = levels.length;
-            if(core==0) {
+            if (core == 0) {
                 currentClockLevel[core][2] = 1;
 //                currentClockLevel[core][0] = Integer.valueOf(levels[levels.length/2]);
             }
             //Fill the matrix of frequencies for each fore
             //Each column represents a frequency F1 F2 F3 ... Fn
-            for(x = 0; x < levels.length; x++)
+            for (x = 0; x < levels.length; x++)
                 clockLevels[core][x] = Integer.valueOf(levels[x]);
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,15 +251,16 @@ public final class CpuManager {
 
     /**
      * Set a given frequency to the specific core. If speed is 0 then core will be turned off
+     *
      * @param core
      * @param speed
      */
-    private void writeSpeedOnCore(int core, int speed){
+    private void writeSpeedOnCore(int core, int speed) {
         StringBuilder path = new StringBuilder();
 
-        if(speed != 0) {
+        if (speed != 0) {
             //Check if core is off and turn it on
-            if(currentClockLevel[core][2] == 0) {
+            if (currentClockLevel[core][2] == 0) {
                 turnCoreOnOff(core, true);
             }
             adjustMinAndMaxSpeed(core);
@@ -267,9 +275,8 @@ public final class CpuManager {
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        }
-        else
-            turnCoreOnOff(core,false);
+        } else
+            turnCoreOnOff(core, false);
     }
 
     private int getSpeedOfCore(int coreNumber) {
@@ -279,48 +286,71 @@ public final class CpuManager {
     /**
      * Method use to set the SeekBar Percentage in FeedBackPopUpWindow based on how many cores are on
      * and their respective frequencies
+     *
      * @return
      */
-    public int getSumNumberCore(){
-        return (calculation()*100)/ (amountOfValuesPerCore*numberOfCores);
+    public int getSumNumberCore() {
+        return (calculation() * 100) / (amountOfValuesPerCore * numberOfCores);
     }
 
-    private int calculation(){
+    private int calculation() {
         int sum = 0;
-        for(int i = 0; i < numberOfCores && currentClockLevel[i][2] == 1; ++i)
-            sum += SearchAlgorithms.binarySearch(currentClockLevel[i][0],i, clockLevels);
+        for (int i = 0; i < numberOfCores && currentClockLevel[i][2] == 1; ++i)
+            sum += SearchAlgorithms.binarySearch(currentClockLevel[i][0], i, clockLevels);
         return sum;
     }
 
     /**
      * Method will setup cores for new configuration in @param arrayConfiguration
+     *
      * @param arrayConfiguration
      */
-    public void adjustConfiguration(ArrayList<String> arrayConfiguration){
+    public void adjustConfiguration(ArrayList<String> arrayConfiguration) {
         int x, i;
         //This means that default setup should be loaded
         //All cores but 0 are turned off
         //Core 0 frequency is set to be its middle frequency of all possible frequencies
-        if(arrayConfiguration.size() == 0){
-            for(i = 1; i < numberOfCores; i++)
-                turnCoreOnOff(i,false);
-            writeSpeedOnCore(0, clockLevels[0][((currentClockLevel[0][1])/2)+1]);
-        }
-        else
+        if (arrayConfiguration.size() == 0) {
+            for (i = 1; i < numberOfCores; i++)
+                turnCoreOnOff(i, false);
+            writeSpeedOnCore(0, clockLevels[0][((currentClockLevel[0][1]) / 2) + 1]);
+        } else
             //i starts at 2 because index 0 represents the name of the running app
             //and index 1 represents the brightness level
-            for(i = 2 ,x = 0; i < arrayConfiguration.size(); i++, x++)
+            for (i = 2, x = 0; i < arrayConfiguration.size(); i++, x++)
                 //Write on core X the frequency represented by index i in arrayConfiguration
                 writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
+    public void setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
+        outConfiguration:
+        for (int i = speedConfiguration.size() - 1; i >= 0; i--) {
+            //Write on core X the frequency represented by index i in arrayConfiguration
+            for (int m = clockLevels[i].length - 1; m >= 0; m--) {
+                if (speedConfiguration.get(i) == 0) {
+                    continue;
+                }
+                if (speedConfiguration.get(i) < clockLevels[i][0]) {
+                    turnCoreOnOff(i, true);
+                    break;
+                }
+                if (speedConfiguration.get(i) >= clockLevels[i].length) {
+                    writeSpeedOnCore(i, clockLevels[i][m]);
+                    break outConfiguration;
+                }
+            }
+        }
+    }
+
+
     /**
      * Get the current frequency of each core, 0 if it's off
+     *
      * @return arrayList of frequencies where each index is the frequency related to that core
      */
-    public ArrayList<Integer> getArrayListCoresSpeed(){
+    public ArrayList<Integer> getArrayListCoresSpeed() {
         ArrayList<Integer> arrayList = new ArrayList<>();
-        for(int i = 0; i < numberOfCores; i++){
+        for (int i = 0; i < numberOfCores; i++) {
             arrayList.add(i, getSpeedOfCore(i));
         }
         return arrayList;
@@ -329,10 +359,11 @@ public final class CpuManager {
     /**
      * Receives a value from the backgroundService that represents the % amount we should increase
      * the frequency(ies)
+     *
      * @param value as percentage
      */
     //TODO amountOfValuesPerCore should be a matrix in case cores have different frequencies between them
-    public void setCpuSpeedFromUserInput(int value){
+    public void setCpuSpeedFromUserInput(int value) {
         int converter = (value * (numberOfCores * amountOfValuesPerCore)) / 100;
         setArrayListOfSpeedFromUserInput(converter);
     }
@@ -341,6 +372,7 @@ public final class CpuManager {
      * Method that receives how many values it should increase in frequencies IN A GLOBAL state
      * So, if you have 48 possible frequencies and converter = 12, then at least 2 cores should be
      * turned on
+     *
      * @param converter
      */
     private void setArrayListOfSpeedFromUserInput(int converter) {
@@ -356,36 +388,33 @@ public final class CpuManager {
         //This means that core 1 will be turned on and frequency will be set at maximum
         //While core 2 (because there still 3 left in the array) will be set to frequency in
         //third position of clockLevels matrix
-        while(i < numberOfCores){
-            if(converter >= amountOfValuesPerCore) {
+        while (i < numberOfCores) {
+            if (converter >= amountOfValuesPerCore) {
                 arrayList.add(i, amountOfValuesPerCore);
                 flag = false;
-            }
-            else if(converter > 0 && converter < amountOfValuesPerCore) {
+            } else if (converter > 0 && converter < amountOfValuesPerCore) {
                 arrayList.add(i, converter);
                 break;
-            }
-            else if(converter == 0 && flag) {
+            } else if (converter == 0 && flag) {
                 arrayList.add(i, 0);
                 break;
-            }
-            else
+            } else
                 break;
             i++;
             converter -= amountOfValuesPerCore;
         }
-        for(i=0; i < arrayList.size(); i++) {
+        for (i = 0; i < arrayList.size(); i++) {
             //Turn core i on and set it to maximum frequency
-            if(arrayList.get(i) == amountOfValuesPerCore)
-                writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)-1]);
-            //Turn core i on and set it to frequency of position i at clockLevels
+            if (arrayList.get(i) == amountOfValuesPerCore)
+                writeSpeedOnCore(i, clockLevels[i][arrayList.get(i) - 1]);
+                //Turn core i on and set it to frequency of position i at clockLevels
             else
                 writeSpeedOnCore(i, clockLevels[i][arrayList.get(i)]);
         }
         //Turn other cores off
-        if(i < numberOfCores){
-            for(; i < numberOfCores; i++)
-                turnCoreOnOff(i,false);
+        if (i < numberOfCores) {
+            for (; i < numberOfCores; i++)
+                turnCoreOnOff(i, false);
         }
     }
 }

@@ -18,13 +18,14 @@
         android:id="@+id/NotificationSwitch"
         android:layout_width="match_parent"
         android:layout_height="88dp"
-        android:checked="true"
+        android:checked="false"
         android:text="@string/notification_bar" />
 
     <Switch
         android:id="@+id/BubbleButtonSwitch"
         android:layout_width="match_parent"
         android:layout_height="85dp"
+        android:checked="false"
         android:text="@string/bubble_button" />
 
 </LinearLayout>
