@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:lineSpacingExtra="18sp"
+        android:text="@string/settings"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textSize="36sp" />
+
+    <Switch
+        android:id="@+id/NotificationSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:checked="false"
+        android:text="@string/notification_bar" />
+
+    <Switch
+        android:id="@+id/BubbleButtonSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:checked="false"
+        android:text="@string/bubble_button" />
+
+</LinearLayout>
