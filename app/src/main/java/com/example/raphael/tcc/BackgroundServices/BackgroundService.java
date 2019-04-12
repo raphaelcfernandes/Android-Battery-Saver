@@ -21,6 +21,10 @@ import com.example.raphael.tcc.SingletonClasses;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -47,6 +51,12 @@ public class BackgroundService extends Service {
     private static int brightnessValue;
     private boolean notifEnabled;
     private boolean buttonEnabled;
+    private String TAG = this.getClass().getName();
+    //New Variable
+    private static boolean screenOn = true, appChanged = false, speedSet = false;
+    private String currentApp;
+    private double THRESHOLD = 0.75;
+    private final static String[] exclusiveApps = {"com.android.launcher", "com.google.android.googlequicksearchbox", "com.example.raphael.tcc", "com.android.systemui", "android"};
 
     @Nullable
     @Override
@@ -54,9 +64,134 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    private ArrayList<Integer> currentspeeds;
+    private static List<Integer> currentSpeeds;
+    private static List<Integer> currentThresholds;
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.i(TAG, "The Thread start to Running.");
+                    //If screenOnOff is off, the thread will be return;
+                    if (!screenOnOff) {
+                        return;
+                    }
+                    //If screen is on
+                    if (screenOn) {
+                        //Get the App Current Running
+                        currentApp = appManager.getAppRunningOnForeground(BackgroundService.this);
+                        boolean isExclusiveApp = Arrays.asList(exclusiveApps).contains(currentApp);
+                        ArrayList<String> appData = appDbHelper.getAppData(CpuManager.getNumberOfCores(), currentApp);
+                        // If the app changed, we will save the current settings.
+                        if (!currentApp.equals(lastApp)) {
+                            if (!isExclusiveApp) {
+                                if (!lastApp.isEmpty()) {
+                                    appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+                                }
+                                lastApp = currentApp;
+                                speedSet = false;
+                            }
+                        }
+                        // Update the last app to current app.
+                        else {
+                            if (!isExclusiveApp) {
+                                //Retrieve app form data base
+                                //If the current app did not exist in the data base
+                                if (appData == null || appData.size() == 0) {
+                                    Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
+                                    Log.i(TAG, "Init the new App");
+                                    //Set the CPU to the highest frequency.
+                                    cpuManager.adjustConfiguration(new ArrayList<>());
+                                    currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                                    currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
+                                    appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+                                } else {
+                                    Log.i(TAG, "The current app " + currentApp + " exist in the database");
+                                    Log.i(TAG, "Setting the configuration based on the database");
+                                    //If there is a configuration from database, set the system based on the configuration
+                                    if (!speedSet) {
+                                        brightnessValue = Integer.parseInt(appData.get(1));
+                                        cpuManager.adjustConfiguration(appData);
+                                        currentSpeeds = cpuManager.getArrayListCoresSpeed();
+                                    }
+                                    currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
+                                    //Frequency based on the previous saved data
+                                }
+                                //If we already have the threshold
+                                if (currentThresholds.size() > 0) {
+                                    for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                        if (currentSpeeds.get(i) > 0) {
+                                            if (currentSpeeds.get(i) > currentThresholds.get(i))
+                                                if ((currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * THRESHOLD)) > currentThresholds.get(i)) {
+                                                    currentSpeeds.set(i, (int) (currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * (1 - THRESHOLD))));
+                                                    currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                                                    speedSet = true;
+                                                    break;
+                                                }
+                                            Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                        }
+                                    }
+
+                                } else {
+                                    // If this a new app, decrease the speed by the plan.
+                                    for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                        if (currentSpeeds.get(i) > 0) {
+                                            currentSpeeds.set(i, (int) (currentSpeeds.get(i) * THRESHOLD));
+                                            Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                            break;
+                                        }
+                                    }
+                                    currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                                    speedSet = true;
+                                }
+                            }
+                        }
+                    }
+                    //Once the screen is off, save the last status and set it to the lowest frequency
+                    else {
+                        // If we have thresholds, we save the threshold, otherwise, we save the current settings.
+                        if (currentThresholds == null || currentThresholds.size() == 0) {
+                            appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<>(CpuManager.getNumberOfCores()));
+                        } else {
+                            appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+                        }
+
+                        //Once we saved the threshold and current speed and threshold, we set screenOn to true to avoid save it again.
+                        //Also, we will use another parameter to detect weather screen is on or not.
+                        screenOn = true;
+                        screenOnOff = false;
+                        speedSet = false;
+                        Log.i(TAG, "Enter Sleep Mode, Set the CPU to the min speed. Turn off all the core except core 0 ");
+                        cpuManager.setToMinSpeed();
+                    }
+                    Log.i(TAG, "The Thread Finished Running.");
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        };
+        scheduler.scheduleAtFixedRate(runnable, 1, 2, SECONDS);
+        return START_NOT_STICKY;
+    }
+
+    private List<Integer> getIntegerArray(List<String> stringArray) {
+        List<Integer> result = new ArrayList<Integer>();
+        for (String stringValue : stringArray) {
+            try {
+                //Convert String to Integer, and store it into integer array list.
+                result.add(Integer.parseInt(stringValue));
+            } catch (NumberFormatException nfe) {
+                //System.out.println("Could not parse " + nfe);
+                result.add(0);
+            }
+        }
+        return result;
+    }
+
+    /*@Override
     //TODO I think the algorithm is not saving correctly the changes of the user when the screen turns off
     //Todo the cause may be that flag screenOnOff doesnt have a if case when it is False
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -64,7 +199,7 @@ public class BackgroundService extends Service {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Log.i(this.getClass().getName(), "run: one");
+                Log.i(this.getClass().getName(), "Running the thread");
                 if (screenOnOff) {
                     loadLastAppOnScreenOnOff = true;//Reload last app
                     actualApp = appManager.getAppRunningOnForeground(BackgroundService.this);
@@ -82,40 +217,41 @@ public class BackgroundService extends Service {
                     if (!loaded) {//Retrieve app info from DB
                         //reload actualApp
                         arrayList = appDbHelper.getAppData(CpuManager.getNumberOfCores(), actualApp);
+                        //If got the app from the database
                         if (!arrayList.isEmpty()) {
                             brightnessValue = Integer.parseInt(arrayList.get(1));
                             cpuManager.adjustConfiguration(arrayList);
+                            //otherwise:
                         } else {
                             cpuManager.adjustConfiguration(new ArrayList<String>());
-                            currentspeeds = cpuManager.getArrayListCoresSpeed();
-                            for (int i = currentspeeds.size() - 1; i >= 0; i--) {
-                                if (currentspeeds.get(i) > 0) {
-                                    currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
-                                    Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
-                                    break;
-                                }
-                            }
-
                         }
                         if (!actualApp.equals(lastApp) && !lastApp.equals("")) {
-                            if (changeDetector)
+                            if (changeDetector) {
                                 appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
-                            else if (firstTimeOnSystem)
+                                currentSpeeds = new ArrayList<>();
+                            } else if (firstTimeOnSystem) {
                                 appDbHelper.insertAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed());
+                                currentSpeeds = new ArrayList<>();
+                            }
                         }
                         //setAppConfiguration(arrayList);
-                        loaded = true;
+                        loaded = false;  // WHY LOAD CHANGED HERE
                         lastApp = actualApp;
                         changeDetector = false;
                     } else {
-                        for (int i = currentspeeds.size() - 1; i >= 0; i--) {
-                            if (currentspeeds.get(i) > 0) {
-                                currentspeeds.set(i, (int) Math.pow(currentspeeds.get(i), 0.95));
-                                Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentspeeds.get(i));
-                                break;
+                        if (currentSpeeds != null && currentSpeeds.size() > 0) {
+                            for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                if (currentSpeeds.get(i) > 0) {
+                                    currentSpeeds.set(i, (int) (currentSpeeds.get(i) * 0.75));
+                                    Log.e(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
+                                    break;
+                                }
                             }
+                            cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                        } else {
+                            cpuManager.adjustConfiguration(new ArrayList<String>());
+                            currentSpeeds = cpuManager.getArrayListCoresSpeed();
                         }
-                        cpuManager.setSpeedByArrayListDESC(currentspeeds);
                     }
                 } else if (loadLastAppOnScreenOnOff) {//When the screen turn off, put all config to min.
                     loadLastAppOnScreenOnOff = false;
@@ -127,9 +263,23 @@ public class BackgroundService extends Service {
                     arrayList.clear();
                     cpuManager.adjustConfiguration(arrayList);
                 }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.i(this.getClass().getName(), "run: Finished Running");
             }
-        }, 1, 1, SECONDS);
+
+        }, 1, 3, SECONDS);
         return START_NOT_STICKY;
+    }*/
+
+    //Once receive the request
+    public void levelUp() {
+        cpuManager.setSpeedByArrayListASC(currentSpeeds);
+        currentThresholds = currentSpeeds;
+        appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
     }
 
     @Override
@@ -182,15 +332,18 @@ public class BackgroundService extends Service {
             int value;
             if (action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")) {
                 value = intent.getIntExtra("valorCpuUsuario", 0);
-                cpuManager.setCpuSpeedFromUserInput(value);
+                Log.i(TAG, "Received the REQUEST_MORE_CPU action");
+                levelUp();
                 changeDetector = true;
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 //changeDetector = false;
-                screenOnOff = false;
+                screenOn = false;
             }
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 screenOnOff = true;
+                screenOn = true;
+            }
 
             if (intent.getAction().equals("com.example.raphael.tcc.ENABLE_BUTTON"))
                 bubbleButton.createFeedBackButton(getApplicationContext());

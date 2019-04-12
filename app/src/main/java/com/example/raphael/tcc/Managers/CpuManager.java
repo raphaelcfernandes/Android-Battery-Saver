@@ -1,6 +1,7 @@
 package com.example.raphael.tcc.Managers;
 
 import android.os.Build;
+import android.util.Log;
 
 import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SearchAlgorithms;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public final class CpuManager {
@@ -115,6 +117,9 @@ public final class CpuManager {
             path.append("echo " + clockLevels[core][0] + " > " + pathCPU + core + "/cpufreq/scaling_min_freq");
             proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
+            proc.getInputStream().close();
+            proc.getOutputStream().close();
+            proc.getErrorStream().close();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -135,6 +140,9 @@ public final class CpuManager {
                 path.append("echo " + getDefaultGovernor() + " > " + pathCPU + i + "/cpufreq/scaling_governor");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
+                proc.getInputStream().close();
+                proc.getOutputStream().close();
+                proc.getErrorStream().close();
                 path.setLength(0);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -144,6 +152,9 @@ public final class CpuManager {
         try {
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
+            proc.getInputStream().close();
+            proc.getOutputStream().close();
+            proc.getErrorStream().close();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
 
@@ -159,6 +170,9 @@ public final class CpuManager {
         try {
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
+            proc.getInputStream().close();
+            proc.getOutputStream().close();
+            proc.getErrorStream().close();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
@@ -177,6 +191,9 @@ public final class CpuManager {
             path.append("echo userspace > " + pathCPU + core + "/cpufreq/scaling_governor");
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
+            proc.getInputStream().close();
+            proc.getOutputStream().close();
+            proc.getErrorStream().close();
             path.setLength(0);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -198,6 +215,9 @@ public final class CpuManager {
                 path.append(String.format("echo 1 > " + pathCPU + "%d/online", core));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
+                proc.getInputStream().close();
+                proc.getOutputStream().close();
+                proc.getErrorStream().close();
                 currentClockLevel[core][2] = 1;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -209,6 +229,9 @@ public final class CpuManager {
                 path.append("echo 0 > " + pathCPU + core + "/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
+                proc.getInputStream().close();
+                proc.getOutputStream().close();
+                proc.getErrorStream().close();
                 //Update column 2 related to the core state (on/off)
                 currentClockLevel[core][2] = 0;
                 //Update column 1 related to the core current frequency
@@ -256,6 +279,7 @@ public final class CpuManager {
      * @param speed
      */
     private void writeSpeedOnCore(int core, int speed) {
+        Log.i(this.getClass().getName(), "writeSpeedOnCore: " + core + ", " + speed);
         StringBuilder path = new StringBuilder();
 
         if (speed != 0) {
@@ -269,6 +293,9 @@ public final class CpuManager {
                 path.append(String.format("echo %d" + " > " + pathCPU + core + "/cpufreq/scaling_setspeed", speed));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
+                proc.getInputStream().close();
+                proc.getOutputStream().close();
+                proc.getErrorStream().close();
                 //!IMPORTANT
                 //Update the current core frequency
                 currentClockLevel[core][0] = speed;
@@ -310,36 +337,84 @@ public final class CpuManager {
         //This means that default setup should be loaded
         //All cores but 0 are turned off
         //Core 0 frequency is set to be its middle frequency of all possible frequencies
+        //Set all cores to the highest speed.
         if (arrayConfiguration.size() == 0) {
-            for (i = 1; i < numberOfCores; i++)
-                turnCoreOnOff(i, false);
-            writeSpeedOnCore(0, clockLevels[0][((currentClockLevel[0][1]) / 2) + 1]);
+            for (i = 0; i < numberOfCores; i++) {
+                turnCoreOnOff(i, true);
+                //old one  ONLY WORKED ON THE CORE 0, NOT ALL CORES.
+                writeSpeedOnCore(i, clockLevels[i][clockLevels[i].length - 1]);
+            }
         } else
             //i starts at 2 because index 0 represents the name of the running app
             //and index 1 represents the brightness level
-            for (i = 2, x = 0; i < arrayConfiguration.size(); i++, x++)
+            for (i = 2, x = 0; i < numberOfCores + 2; i++, x++)
                 //Write on core X the frequency represented by index i in arrayConfiguration
                 writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
     }
 
-    public void setSpeedByArrayListDESC(ArrayList<Integer> speedConfiguration) {
+    public void setToMinSpeed() {
+        for (int i = 0; i < numberOfCores; i++) {
+            if (i == 0) {
+                writeSpeedOnCore(0, clockLevels[0][0]);
+            } else {
+                writeSpeedOnCore(i, 0);
+            }
+        }
+    }
+
+    public List<Integer> setSpeedByArrayListDESC(List<Integer> speedConfiguration) {
+        int core = speedConfiguration.size();
+        int speed = 0;
         outConfiguration:
-        for (int i = speedConfiguration.size() - 1; i >= 0; i--) {
+        for (int i = numberOfCores - 1; i >= 0; i--) {
             //Write on core X the frequency represented by index i in arrayConfiguration
             for (int m = clockLevels[i].length - 1; m >= 0; m--) {
                 if (speedConfiguration.get(i) == 0) {
+                    if (currentClockLevel[i][2] == 1) {
+                        writeSpeedOnCore(i, 0);
+                    }
                     continue;
                 }
-                if (speedConfiguration.get(i) < clockLevels[i][0]) {
-                    turnCoreOnOff(i, true);
+                if (speedConfiguration.get(i) < clockLevels[i][0] && i != 0) {
+                    speedConfiguration.set(i, 0);
+                    if (currentClockLevel[i][2] == 1) {
+                        writeSpeedOnCore(i, 0);
+                    }
                     break;
                 }
-                if (speedConfiguration.get(i) >= clockLevels[i].length) {
-                    writeSpeedOnCore(i, clockLevels[i][m]);
+                if (speedConfiguration.get(i) >= clockLevels[i][m]) {
+                    core = i;
+                    if (m > 0) {
+                        speed = clockLevels[i][m];
+                    } else {
+                        speed = clockLevels[i][0];
+                    }
+                    writeSpeedOnCore(core, speed);
                     break outConfiguration;
                 }
             }
         }
+
+        return speedConfiguration;
+    }
+
+    public List<Integer> setSpeedByArrayListASC(List<Integer> speedConfiguration) {
+        try {
+            outConfiguration:
+            for (int i = 0; i < speedConfiguration.size() ; i++) {
+                //Write on core X the frequency represented by index i in arrayConfiguration
+                for (int m = 0; m < clockLevels[i].length; m++) {
+                    if (speedConfiguration.get(i) < clockLevels[i][m]) {
+                        writeSpeedOnCore(i, clockLevels[i][m]);
+                        speedConfiguration.set(i, clockLevels[i][m]);
+                        break outConfiguration;
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return speedConfiguration;
     }
 
 
