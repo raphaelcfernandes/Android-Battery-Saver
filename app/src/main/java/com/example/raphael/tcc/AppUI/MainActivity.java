@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     FragmentPagerAdapter fpa;
 
     public void onCreate(Bundle savedInstanceState) {
+    @Override
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_pager); //Gets the layout from R class
         //Check for usage stats permission
@@ -56,25 +58,6 @@ public class MainActivity extends AppCompatActivity {
         ViewPager viewPager = findViewById(R.id.viewPager); //Set new view pager
         fpa = new HomeScreen(getSupportFragmentManager());
         viewPager.setAdapter(fpa);
-
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() //Tells if the user swipes pages
-                                          {
-                                              @Override
-                                              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                                                  //This is where an animation can be placed when swiping between pages.
-                                              }
-
-                                              @Override
-                                              public void onPageSelected(int position) {
-                                                  //This code is executed when the page is the current position.
-                                              }
-
-                                              @Override
-                                              public void onPageScrollStateChanged(int state) {
-                                                  //Used to detect specifics about what is happening during the changing of pages.
-                                              }
-                                          }
-        );
     }
 
     public void onResume() {

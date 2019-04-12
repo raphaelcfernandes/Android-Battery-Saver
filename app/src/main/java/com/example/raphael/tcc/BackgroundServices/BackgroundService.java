@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -284,14 +285,18 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //removed bubbleButton
-        //bubbleButton.createFeedBackButton(getApplicationContext());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction("com.example.raphael.tcc.REQUESTED_MORE_CPU");
         registerReceiver(broadcastRcv, filter);
-        //Create the notification
-        speedUpNotification.createSpeedUpNotification(this);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+        buttonEnabled = sharedPreferences.getBoolean("bubble_button", false);
+        notifEnabled = sharedPreferences.getBoolean("notification", false);
+
+        if(buttonEnabled)
+            bubbleButton.createFeedBackButton(getApplicationContext());
+        if(notifEnabled)
+            speedUpNotification.createSpeedUpNotification(getApplicationContext());
     }
 
 

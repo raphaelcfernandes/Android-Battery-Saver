@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.raphael.tcc.AppUI.ViewPagerFragments.AppStatsView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +85,59 @@ public class AppDbHelper extends SQLiteOpenHelper {
         return arrayList;
     }
 
+    //baw76 method
+    //New method will simply get every row in the table and make a new AppStatsView
+    public ArrayList<AppStatsView> getAllAppData()
+    {
+        ArrayList<AppStatsView> appData = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        //Helpful to shorten query
+        String tbName = DBContract.APP_DATABASE.TABLE_NAME;
+        String appNameParam = DBContract.APP_DATABASE.APP_NAME;
+        String brightParam = DBContract.APP_DATABASE.COLUMN_BRIGHTNESS;
+        String coreParam1 = DBContract.APP_DATABASE.COLUMN_CORE + 0;
+        String coreParam2 = DBContract.APP_DATABASE.COLUMN_CORE + 1;
+        String coreParam3 = DBContract.APP_DATABASE.COLUMN_CORE + 2;
+        String coreParam4 = DBContract.APP_DATABASE.COLUMN_CORE + 3;
+
+        //Query the database and save into a Cursor object
+        String[] columns = {appNameParam,brightParam,coreParam1,coreParam2,coreParam3,coreParam4};
+        Cursor cursor = db.query(tbName,columns, null,null, null, null, null);
+
+        //Set indices to make parsing the row easier
+        int appNameIndex = cursor.getColumnIndex(appNameParam);
+        int brightIndex = cursor.getColumnIndex(brightParam);
+        int core1Index = cursor.getColumnIndex(coreParam1);
+        int core2Index = cursor.getColumnIndex(coreParam2);
+        int core3Index = cursor.getColumnIndex(coreParam3);
+        int core4Index = cursor.getColumnIndex(coreParam4);
+
+        //Checks that cursor is not empty
+        if(!cursor.moveToFirst())
+            return new ArrayList<AppStatsView>();
+
+        do
+        {
+            //Get the corresponding value from each column in the row
+            String appName = cursor.getString(appNameIndex);
+            int brtness = cursor.getInt(brightIndex);
+            int core1 = cursor.getInt(core1Index);
+            int core2 = cursor.getInt(core2Index);
+            int core3 = cursor.getInt(core3Index);
+            int core4 = cursor.getInt(core4Index);
+
+            //Add the new AppStatsView to our list
+            appData.add(new AppStatsView(appName, brtness, core1, core2, core3, core4));
+        }
+        while (cursor.moveToNext()); //Will iterate the cursor Index
+
+        //Close the cursor and database connection; return the list we created
+        cursor.close();
+        db.close();
+        return appData;
+    }
+  
     public void updateAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
         if (!CheckIsDataAlreadyInDBorNot(APP_NAME))
             insertAppConfiguration(APP_NAME, brightnessLevel, cpuSpeed, thresholds);

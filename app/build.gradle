@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+allprojects {
+    repositories {
+        jcenter()
+        google()
+    }
+}
+
 android {
     compileSdkVersion 26
 
