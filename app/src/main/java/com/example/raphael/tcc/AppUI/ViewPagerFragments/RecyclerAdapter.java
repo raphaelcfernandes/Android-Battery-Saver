@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.raphael.tcc.R;
@@ -54,6 +55,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
         View appView = inflater.inflate(R.layout.app_view_layout, parent, false);
 
+        LinearLayout layout = appView.findViewById(R.id.app_info);
+        //layout.setVisibility(View.GONE);
+
         ViewHolder viewHolder = new ViewHolder(appView);
         return viewHolder;
     }
@@ -63,17 +67,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     {
         AppStatsView app = appViews.get(position);
         viewHolder.appTitle.setText(app.getAppName());
-        viewHolder.brightness.setText(Integer.toString(app.getBrightness()));
-        viewHolder.cpuFreq1.setText(Integer.toString(app.getCoreSpeed1()));
-        viewHolder.cpuFreq2.setText(Integer.toString(app.getCoreSpeed2()));
-        viewHolder.cpuFreq3.setText(Integer.toString(app.getCoreSpeed3()));
-        viewHolder.cpuFreq4.setText(Integer.toString(app.getCoreSpeed4()));
+        viewHolder.brightness.setText("Brt: " + app.getBrightness());
+        viewHolder.cpuFreq1.setText("CPU0: " + app.getCoreSpeed1());
+        viewHolder.cpuFreq2.setText("CPU1: " + app.getCoreSpeed2());
+        viewHolder.cpuFreq3.setText("CPU2: " + app.getCoreSpeed3());
+        viewHolder.cpuFreq4.setText("CPU3: " + app.getCoreSpeed4());
     }
 
     @Override
     public int getItemCount()
     {
         return appViews.size();
+    }
+
+    public void expand_info(View view)
+    {
+        LinearLayout layout = view.findViewById(R.id.app_info);
+        layout.setVisibility(layout.isShown() ? View.GONE : View.VISIBLE);
     }
 }
 
