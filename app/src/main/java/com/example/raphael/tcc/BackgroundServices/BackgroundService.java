@@ -104,7 +104,7 @@ public class BackgroundService extends Service {
                                     Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
                                     Log.i(TAG, "Init the new App");
                                     //Set the CPU to the highest frequency.
-                                    cpuManager.adjustConfiguration(new ArrayList<>());
+                                    cpuManager.adjustConfiguration(new ArrayList<String>());
                                     currentSpeeds = cpuManager.getArrayListCoresSpeed();
                                     currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
                                     appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
@@ -154,7 +154,7 @@ public class BackgroundService extends Service {
                     else {
                         // If we have thresholds, we save the threshold, otherwise, we save the current settings.
                         if (currentThresholds == null || currentThresholds.size() == 0) {
-                            appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<>(CpuManager.getNumberOfCores()));
+                            appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), new ArrayList<Integer>(CpuManager.getNumberOfCores()));
                         } else {
                             appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
                         }
