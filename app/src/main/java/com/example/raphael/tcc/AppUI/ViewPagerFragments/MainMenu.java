@@ -3,6 +3,7 @@ package com.example.raphael.tcc.AppUI.ViewPagerFragments;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -44,8 +45,28 @@ public class MainMenu extends Fragment {
         View newView = inflate.inflate(R.layout.main_menu, container, false); //Set up container
         activate = newView.findViewById(R.id.activate); //Get the layouts from R
         deactivate = newView.findViewById(R.id.deactivate);
+
+        Context context = getActivity().getBaseContext();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("menu_state", Context.MODE_PRIVATE);
+        String state = sharedPreferences.getString("current_state", "deactivate");
+        if(state.equals("activate")) {
+            activate.setEnabled(false);
+            deactivate.setEnabled(true);
+        }
+        else if(state.equals("deactivate"))
+        {
+            activate.setEnabled(true);
+            deactivate.setEnabled(false);
+        }
+
         //Detects the click for the activate button
         activate.setOnClickListener(view -> {
+            Context context2 = getActivity().getBaseContext();
+            SharedPreferences sharedPreferences2 = context2.getSharedPreferences("menu_state", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor2 = sharedPreferences2.edit();
+            editor2.putString("current_state", "activate");
+            editor2.apply();
+
             activate.setEnabled(false); //No repeat presses of activate
             deactivate.setEnabled(true); //Allow for press of deactivate
             getActivity().startService(new Intent(getActivity(), BackgroundService.class)); //Start the background
@@ -53,6 +74,12 @@ public class MainMenu extends Fragment {
 
         //Detects click on the deactivate button
         deactivate.setOnClickListener(view -> {
+            Context context2 = getActivity().getBaseContext();
+            SharedPreferences sharedPreferences2 = context2.getSharedPreferences("menu_state", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor2 = sharedPreferences2.edit();
+            editor2.putString("current_state", "deactivate");
+            editor2.apply();
+
             activate.setEnabled(true); //Allow for activate to be pressed
             deactivate.setEnabled(false); //No repeat press of deactivate
             getActivity().stopService(new Intent(getActivity(), BackgroundService.class)); //Stop background
