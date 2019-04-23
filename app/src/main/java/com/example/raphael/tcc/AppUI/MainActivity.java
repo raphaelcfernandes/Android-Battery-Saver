@@ -27,9 +27,8 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
     FragmentPagerAdapter fpa;
 
-    public void onCreate(Bundle savedInstanceState) {
     @Override
-
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_pager); //Gets the layout from R class
         //Check for usage stats permission
