@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.raphael.tcc.DataBase.AppDbHelper;
+import com.example.raphael.tcc.Logv;
 import com.example.raphael.tcc.R;
 
 /*
@@ -22,7 +23,7 @@ import com.example.raphael.tcc.R;
 public class UsageStats extends Fragment
 {
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter recAdapter;
+    private RecyclerAdapter recAdapter;
     private RecyclerView.LayoutManager recManager;
     private ArrayList<AppStatsView> appStatsList = new ArrayList<>();
     private AppDbHelper dbHelper;
@@ -34,21 +35,24 @@ public class UsageStats extends Fragment
         newUS.setArguments(args);
         return newUS;
     }
-
+    private void log(String msg) {
+        Logv.log(getClass().getSimpleName() + " - " + msg);
+    }
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        log("onCreate()");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflate, ViewGroup container, Bundle savedInstanceState)
     {
+        log("onCreateView()");
         View newView = inflate.inflate(R.layout.usage_stats, container, false);
 
         //Get all the data from the database and create the list
-        dbHelper = new AppDbHelper(getActivity().getApplicationContext());
-        appStatsList = dbHelper.getAllAppData();
+        appStatsList = AppDbHelper.getInstance(getActivity().getApplicationContext()).getAllAppData();
 
         //Set all the necessary handlers for the RecyclerView
         recyclerView = newView.findViewById(R.id.recyclerView);
@@ -59,5 +63,24 @@ public class UsageStats extends Fragment
         recyclerView.setAdapter(recAdapter);
 
         return newView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        log("onResume()");
+
+        //get the latest data updates from the database and refresh the list
+        appStatsList = AppDbHelper.getInstance(getActivity().getApplicationContext()).getAllAppData();
+        //refresh list with the latest updates
+        recAdapter.updateList(appStatsList);
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        log("onPause()");
+
     }
 }

@@ -6,6 +6,8 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.Build;
 
+import com.example.raphael.tcc.Logv;
+
 import java.util.Calendar;
 import java.util.List;
 import java.util.SortedMap;
@@ -37,12 +39,15 @@ public class AppManager {
     private UsageStatsManager getUsageStatsManager(Context context) {
         return (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
     }
+
     @TargetApi(Build.VERSION_CODES.M)
     private String getProcessName(List<UsageStats> stats) {
+        log("getProcessName() - listSize:" + stats.size());
         String foregroundProcess = "";
             if(stats != null) {
                 SortedMap<Long,UsageStats> mySortedMap = new TreeMap<>();
                 for (UsageStats usageStats : stats) {
+                    //log("appPackageName:" + usageStats.getPackageName());
                     mySortedMap.put(usageStats.getLastTimeUsed(),usageStats);
                 }
                 if(!mySortedMap.isEmpty()) {
@@ -50,6 +55,9 @@ public class AppManager {
                 }
             }
         return foregroundProcess;
+    }
+    private void log(String msg) {
+        Logv.log(getClass().getSimpleName() + " - " + msg);
     }
 
 }

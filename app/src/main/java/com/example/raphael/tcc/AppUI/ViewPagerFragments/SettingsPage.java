@@ -41,6 +41,7 @@ public class SettingsPage extends Fragment
         View newView = inflate.inflate(R.layout.settings_page, container, false); //Create fragment
         bbSwitch = newView.findViewById(R.id.BubbleButtonSwitch); //Find the layout of BubbleButton
         notifSwitch = newView.findViewById(R.id.NotificationSwitch); //Find layout of Notification
+        loadSettings();
 
         bbSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {   //Detects a change in the switch position
@@ -92,5 +93,19 @@ public class SettingsPage extends Fragment
         });
 
         return newView;
+    }
+
+    private void loadSettings() {
+        Context context = getActivity().getBaseContext();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("shared_settings", Context.MODE_PRIVATE);
+
+        //
+        boolean bubbleButtonSavedSetting = sharedPreferences.getBoolean("bubble_button", false);
+        bbSwitch.setChecked(bubbleButtonSavedSetting);
+
+        //
+        boolean notificationSavedSetting = sharedPreferences.getBoolean("notification", false);
+        notifSwitch.setChecked(notificationSavedSetting);
+
     }
 }

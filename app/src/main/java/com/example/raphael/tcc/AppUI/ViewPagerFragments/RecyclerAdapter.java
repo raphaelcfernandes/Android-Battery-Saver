@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.raphael.tcc.Logv;
 import com.example.raphael.tcc.R;
 
 /*
@@ -66,12 +67,26 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(RecyclerAdapter.ViewHolder viewHolder, int position)
     {
         AppStatsView app = appViews.get(position);
-        viewHolder.appTitle.setText(app.getAppName());
+        if (app.getAppName() == null || app.getAppName().isEmpty()){
+            viewHolder.appTitle.setText("Unknown Package");
+        }else {
+            viewHolder.appTitle.setText(app.getAppName());
+
+        }
         viewHolder.brightness.setText("Brt: " + app.getBrightness());
         viewHolder.cpuFreq1.setText("CPU0: " + app.getCoreSpeed1());
         viewHolder.cpuFreq2.setText("CPU1: " + app.getCoreSpeed2());
         viewHolder.cpuFreq3.setText("CPU2: " + app.getCoreSpeed3());
         viewHolder.cpuFreq4.setText("CPU3: " + app.getCoreSpeed4());
+
+        viewHolder.appTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                expand_info(viewHolder.itemView);
+
+            }
+        });
     }
 
     @Override
@@ -82,8 +97,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     public void expand_info(View view)
     {
+        log("expand_info()");
         LinearLayout layout = view.findViewById(R.id.app_info);
         layout.setVisibility(layout.isShown() ? View.GONE : View.VISIBLE);
+    }
+
+    public void updateList(ArrayList<AppStatsView> statsList) {
+        log("updateList() - listSize: " + statsList.size());
+        //update appViews List
+        appViews = statsList;
+        //refresh adapter to redisplay the new content
+        notifyDataSetChanged();
+    }
+
+    private void log(String msg) {
+        Logv.log(getClass().getSimpleName() + " - " + msg);
     }
 }
 

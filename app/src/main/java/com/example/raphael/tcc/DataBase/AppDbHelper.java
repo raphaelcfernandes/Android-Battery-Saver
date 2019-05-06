@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.raphael.tcc.AppUI.ViewPagerFragments.AppStatsView;
+import com.example.raphael.tcc.Logv;
 import com.example.raphael.tcc.Managers.CpuManager;
 
 import java.util.ArrayList;
@@ -18,11 +19,25 @@ import java.util.List;
 
 public class AppDbHelper extends SQLiteOpenHelper {
 
+    private final String classTag = getClass().getSimpleName();
+    private static AppDbHelper instance;
+
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "APP_DATABASE.db";
 
-    public AppDbHelper(Context context) {
+    public static synchronized AppDbHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new AppDbHelper(context);
+        }
+        return instance;
+    }
+
+    private AppDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    private void log(String msg) {
+        Logv.log(classTag + " - " + msg);
     }
 
     // Method is called during creation of the database
@@ -40,6 +55,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
     }
 
     public void insertAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
+        log("insertAppConfiguration() - App_NAME:" + APP_NAME);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBContract.APP_DATABASE.APP_NAME, APP_NAME);
@@ -67,6 +83,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getAppData(int numberOfCores, String AppName) {
+        log("getAppData() - AppName:" + AppName);
         ArrayList<String> arrayList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + DBContract.APP_DATABASE.TABLE_NAME + " WHERE "
@@ -137,8 +154,10 @@ public class AppDbHelper extends SQLiteOpenHelper {
         int appNameIndex = cursor.getColumnIndex(appNameParam);
         int brightIndex = cursor.getColumnIndex(brightParam);
         ArrayList<Integer> coreIndexes = new ArrayList<>();
-        for(int i = 0; i < numCores; i++)
+        for(int i = 0; i < numCores; i++){
+            log("getAllAppData - i:" + i);
             coreIndexes.add(cursor.getColumnIndex(coreParams[i]));
+        }
 
         //Checks that cursor is not empty
         if(!cursor.moveToFirst())
@@ -172,6 +191,8 @@ public class AppDbHelper extends SQLiteOpenHelper {
     }
   
     public void updateAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
+        log("updateAppConfiguration() - App_NAME:" + APP_NAME + " - brightnessLevel: " + brightnessLevel);
+
         if (!CheckIsDataAlreadyInDBorNot(APP_NAME))
             insertAppConfiguration(APP_NAME, brightnessLevel, cpuSpeed, thresholds);
         else {

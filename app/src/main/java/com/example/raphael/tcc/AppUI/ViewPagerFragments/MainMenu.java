@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.raphael.tcc.BackgroundServices.BackgroundService;
+import com.example.raphael.tcc.Logv;
 import com.example.raphael.tcc.R;
 
 /*
@@ -34,10 +35,14 @@ public class MainMenu extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+    private void log(String msg) {
+        Logv.log(getClass().getSimpleName() + " - " + msg);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        log("onCreate()");
     }
 
     @Override
@@ -49,9 +54,13 @@ public class MainMenu extends Fragment {
         Context context = getActivity().getBaseContext();
         SharedPreferences sharedPreferences = context.getSharedPreferences("menu_state", Context.MODE_PRIVATE);
         String state = sharedPreferences.getString("current_state", "deactivate");
+        log("onCreateView() - state:" + state);
+
         if(state.equals("activate")) {
+            getActivity().startService(new Intent(getActivity(), BackgroundService.class)); //Start the background
             activate.setEnabled(false);
             deactivate.setEnabled(true);
+
         }
         else if(state.equals("deactivate"))
         {

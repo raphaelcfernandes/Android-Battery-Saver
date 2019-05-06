@@ -3,6 +3,7 @@ package com.example.raphael.tcc.Managers;
 import android.os.Build;
 import android.util.Log;
 
+import com.example.raphael.tcc.Logv;
 import com.example.raphael.tcc.ReadWriteFile;
 import com.example.raphael.tcc.SearchAlgorithms;
 
@@ -53,12 +54,17 @@ public final class CpuManager {
                 }
             }).length;
         }
+        log("CpuManager() - numberOfCores:" + numberOfCores);
         if (!isClockLevelsFilled) {
             isClockLevelsFilled = true;
             clockLevels = new int[numberOfCores][];
             currentClockLevel = new int[numberOfCores][3];
             prepareCores();
         }
+    }
+
+    private void log(String msg) {
+        Logv.log(getClass().getSimpleName() + " - " + msg);
     }
 
     /**
@@ -117,9 +123,9 @@ public final class CpuManager {
             path.append("echo " + clockLevels[core][0] + " > " + pathCPU + core + "/cpufreq/scaling_min_freq");
             proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
-            proc.getInputStream().close();
+            /*proc.getInputStream().close();
             proc.getOutputStream().close();
-            proc.getErrorStream().close();
+            proc.getErrorStream().close();*/
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -140,10 +146,10 @@ public final class CpuManager {
                 path.append("echo " + getDefaultGovernor() + " > " + pathCPU + i + "/cpufreq/scaling_governor");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                proc.getInputStream().close();
+                /*proc.getInputStream().close();
                 proc.getOutputStream().close();
                 proc.getErrorStream().close();
-                path.setLength(0);
+                path.setLength(0);*/
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -152,9 +158,9 @@ public final class CpuManager {
         try {
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
-            proc.getInputStream().close();
+            /*proc.getInputStream().close();
             proc.getOutputStream().close();
-            proc.getErrorStream().close();
+            proc.getErrorStream().close();*/
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
 
@@ -170,9 +176,9 @@ public final class CpuManager {
         try {
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", stopMpDecision});
             proc.waitFor();
-            proc.getInputStream().close();
+            /*proc.getInputStream().close();
             proc.getOutputStream().close();
-            proc.getErrorStream().close();
+            proc.getErrorStream().close();*/
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
@@ -191,9 +197,9 @@ public final class CpuManager {
             path.append("echo userspace > " + pathCPU + core + "/cpufreq/scaling_governor");
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
             proc.waitFor();
-            proc.getInputStream().close();
+            /*proc.getInputStream().close();
             proc.getOutputStream().close();
-            proc.getErrorStream().close();
+            proc.getErrorStream().close();*/
             path.setLength(0);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -215,9 +221,9 @@ public final class CpuManager {
                 path.append(String.format("echo 1 > " + pathCPU + "%d/online", core));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                proc.getInputStream().close();
+                /*proc.getInputStream().close();
                 proc.getOutputStream().close();
-                proc.getErrorStream().close();
+                proc.getErrorStream().close();*/
                 currentClockLevel[core][2] = 1;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -229,9 +235,9 @@ public final class CpuManager {
                 path.append("echo 0 > " + pathCPU + core + "/online");
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                proc.getInputStream().close();
+                /*proc.getInputStream().close();
                 proc.getOutputStream().close();
-                proc.getErrorStream().close();
+                proc.getErrorStream().close();*/
                 //Update column 2 related to the core state (on/off)
                 currentClockLevel[core][2] = 0;
                 //Update column 1 related to the core current frequency
@@ -253,7 +259,8 @@ public final class CpuManager {
         int x;
         try {
             //This return a list of frequencies as: F1 F2 F3 ... Fn
-            line = ReadWriteFile.returnStringFromProcess(Runtime.getRuntime().exec(new String[]{"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"}));
+            Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"});
+            line = ReadWriteFile.returnStringFromProcess(proc);
             levels = line.split("[ \t]");
             clockLevels[core] = new int[levels.length];
             //Set how many different frequencies this core has
@@ -293,9 +300,9 @@ public final class CpuManager {
                 path.append(String.format("echo %d" + " > " + pathCPU + core + "/cpufreq/scaling_setspeed", speed));
                 Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", path.toString()});
                 proc.waitFor();
-                proc.getInputStream().close();
+                /*proc.getInputStream().close();
                 proc.getOutputStream().close();
-                proc.getErrorStream().close();
+                proc.getErrorStream().close();*/
                 //!IMPORTANT
                 //Update the current core frequency
                 currentClockLevel[core][0] = speed;
@@ -363,7 +370,6 @@ public final class CpuManager {
     }
 
     public List<Integer> setSpeedByArrayListDESC(List<Integer> speedConfiguration) {
-        int core = speedConfiguration.size();
         int speed = 0;
         outConfiguration:
         for (int i = numberOfCores - 1; i >= 0; i--) {
@@ -373,7 +379,7 @@ public final class CpuManager {
                     if (currentClockLevel[i][2] == 1) {
                         writeSpeedOnCore(i, 0);
                     }
-                    continue;
+                    break;
                 }
                 if (speedConfiguration.get(i) < clockLevels[i][0] && i != 0) {
                     speedConfiguration.set(i, 0);
@@ -383,13 +389,12 @@ public final class CpuManager {
                     break;
                 }
                 if (speedConfiguration.get(i) >= clockLevels[i][m]) {
-                    core = i;
                     if (m > 0) {
                         speed = clockLevels[i][m];
                     } else {
                         speed = clockLevels[i][0];
                     }
-                    writeSpeedOnCore(core, speed);
+                    writeSpeedOnCore(i, speed);
                     break outConfiguration;
                 }
             }
