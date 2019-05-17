@@ -133,8 +133,7 @@ public class BackgroundService extends Service {
                                 log("Init the new App");
                                 Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
                                 Log.i(TAG, "Init the new App");
-                                //Set the CPU to the default.
-                                //Which all cores are turned off except the core 0 is turned on
+                                //Set the CPU to the maximum power
                                 cpuManager.adjustConfiguration(appData);
                                 currentSpeeds = cpuManager.getArrayListCoresSpeed();
                                 currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
