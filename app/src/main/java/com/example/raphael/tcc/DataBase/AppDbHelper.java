@@ -84,6 +84,25 @@ public class AppDbHelper extends SQLiteOpenHelper {
 
     public ArrayList<String> getAppData(int numberOfCores, String AppName) {
         log("getAppData() - AppName:" + AppName);
+        //Array list size should be total of the following items
+        //1- app name
+        //2- brightness value
+        //3- N of cores
+        //4- N of thresholds
+
+        //so if we have CPU with 4 cores then the size will be 10
+        //[0] appName
+        //[1] brightnessValue
+        //[2] core0Speed
+        //[3] core1Speed
+        //[4] core2Speed
+        //[5] core3Speed
+        //[6] core0Threshold
+        //[7] core1Threshold
+        //[8] core2Threshold
+        //[9] core0Threshold
+
+        //
         ArrayList<String> arrayList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + DBContract.APP_DATABASE.TABLE_NAME + " WHERE "

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -254,26 +255,40 @@ public final class CpuManager {
      * @param core
      */
     private void fillClockLevelMatrix(int core) {
-        String line;
-        String[] levels;
+        String response;
+        String[] availableFrequencies;
         int x;
         try {
             //This return a list of frequencies as: F1 F2 F3 ... Fn
             Process proc = Runtime.getRuntime().exec(new String[]{"su", "-c", "cat /sys/devices/system/cpu/cpu" + core + "/cpufreq/scaling_available_frequencies"});
-            line = ReadWriteFile.returnStringFromProcess(proc);
-            levels = line.split("[ \t]");
-            clockLevels[core] = new int[levels.length];
+            response = ReadWriteFile.returnStringFromProcess(proc);
+            availableFrequencies = response.split("[ \t]");
+
             //Set how many different frequencies this core has
-            currentClockLevel[core][1] = levels.length;
-            amountOfValuesPerCore = levels.length;
+            currentClockLevel[core][1] = availableFrequencies.length;
+            amountOfValuesPerCore = availableFrequencies.length;
+
+            //
             if (core == 0) {
                 currentClockLevel[core][2] = 1;
-//                currentClockLevel[core][0] = Integer.valueOf(levels[levels.length/2]);
+//                currentClockLevel[core][0] = Integer.valueOf(availableFrequencies[availableFrequencies.length/2]);
             }
-            //Fill the matrix of frequencies for each fore
+
+            //convert to values to int and save them in a list
+            List<Integer> availableFrequenciesList = new ArrayList<>();
+            for(String frequency : availableFrequencies) {
+                availableFrequenciesList.add(Integer.valueOf(frequency));
+            }
+
+            //sort frequencies list in ASC order
+            Collections.sort(availableFrequenciesList);
+
+            //Fill the matrix of frequencies for the core
             //Each column represents a frequency F1 F2 F3 ... Fn
-            for (x = 0; x < levels.length; x++)
-                clockLevels[core][x] = Integer.valueOf(levels[x]);
+            clockLevels[core] = new int[availableFrequenciesList.size()];
+            for (x = 0; x < availableFrequenciesList.size(); x++)
+                clockLevels[core][x] = availableFrequenciesList.get(x);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

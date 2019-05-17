@@ -22,6 +22,7 @@ import com.example.raphael.tcc.SingletonClasses;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -55,6 +56,9 @@ public class BackgroundService extends Service {
     private static boolean screenOn = true, appChanged = false, speedSet = false, isExcludedApp;
     private String currentApp;
     private double threshold = 1;
+    private double decreasePercentage = 0.05; // 5% decrease interval
+    private long decreaseInterval = 5 * 1000; // 5 seconds interval
+    private long decreaseTimerStartTime = 0;
     ArrayList<String> appData;
     private final static HashMap<String, Boolean> excludedApps = initExcludedAppsList();
 
@@ -101,8 +105,8 @@ public class BackgroundService extends Service {
                     if (!currentApp.equals(lastApp)) {
                         log("runnable - foreground app changed");
 
-                        //save last app setting in the database if lastApp exists and lastApp is not excluded app to avoid overhead
-                        if (!lastApp.isEmpty() && !isExcludedApp) {
+                        // to avoid overhead we have to save last app setting in the database only if lastApp exists, lastApp is not excluded app and speed is changed
+                        if (!lastApp.isEmpty() && !isExcludedApp && isSpeedChanged()) {
                             appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
                         }
 
@@ -120,6 +124,7 @@ public class BackgroundService extends Service {
                     // Update the last app to current app.
                     else {
                         log("runnable - currentApp still running - isExcludedApp: " + isExcludedApp);
+
                         if (!isExcludedApp) {
 
                             //Retrieve app form data base
@@ -128,7 +133,8 @@ public class BackgroundService extends Service {
                                 log("Init the new App");
                                 Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
                                 Log.i(TAG, "Init the new App");
-                                //Set the CPU to the highest frequency.
+                                //Set the CPU to the default.
+                                //Which all cores are turned off except the core 0 is turned on
                                 cpuManager.adjustConfiguration(appData);
                                 currentSpeeds = cpuManager.getArrayListCoresSpeed();
                                 currentThresholds = new ArrayList<>(CpuManager.getNumberOfCores());
@@ -146,32 +152,46 @@ public class BackgroundService extends Service {
                                 currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
                                 //Frequency based on the previous saved data
                             }
-                            //If we already have the threshold
-                            if (currentThresholds.size() > 0) {
-                                for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
-                                    if (currentSpeeds.get(i) > 0) {
-                                        if (currentSpeeds.get(i) > currentThresholds.get(i))
-                                            if ((currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * threshold)) > currentThresholds.get(i)) {
-                                                currentSpeeds.set(i, (int) (currentSpeeds.get(i) - ((currentSpeeds.get(i) - currentThresholds.get(i)) * (1 - threshold))));
-                                                currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
-                                                speedSet = true;
-                                                break;
-                                            }
-                                        Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
-                                    }
-                                }
 
-                            } else {
-                                // If this a new app, decrease the speed by the plan.
-                                for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
-                                    if (currentSpeeds.get(i) > 0) {
-                                        currentSpeeds.set(i, (int) (currentSpeeds.get(i) * threshold));
-                                        Log.d(this.getClass().getName(), "current speed: " + i + ", " + currentSpeeds.get(i));
-                                        break;
+
+
+                            //calculate decrease interval timer
+                            long currentTime = Calendar.getInstance().getTimeInMillis();
+                            long decreaseTimerDiff = currentTime - decreaseTimerStartTime;
+
+                            //decrease every core speed by decreasePercentage value every X amount of seconds
+                            if (decreaseTimerDiff > decreaseInterval) {
+
+                                //reset timer
+                                decreaseTimerStartTime = currentTime;
+
+                                //If we have thresholds
+                                if (currentThresholds.size() > 0) {
+                                    int coreNewSpeed = 0;
+                                    for (int i = currentSpeeds.size() - 1; i >= 0; i--) {
+                                        if (currentSpeeds.get(i) > 0) {
+                                            if (currentSpeeds.get(i) > currentThresholds.get(i))
+
+                                                coreNewSpeed = (int)(currentSpeeds.get(i) - (currentSpeeds.get(i) * decreasePercentage));
+
+                                                // apply decrease only if the new core speed is greater than or equal the current threshold
+                                                if ( coreNewSpeed >= currentThresholds.get(i)) {
+
+                                                    //
+                                                    log("core:" + i + " - currentSpeed: " + currentSpeeds.get(i) + " - decreased by " + (decreasePercentage * 100) +"% - coreNewSpeed: " + coreNewSpeed);
+
+                                                    //save the core new speed
+                                                    currentSpeeds.set(i, coreNewSpeed);
+                                                    //apply the core new speed
+                                                    currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
+                                                    //
+                                                    speedSet = true;
+
+                                                }
+                                        }
                                     }
+
                                 }
-                                currentSpeeds = cpuManager.setSpeedByArrayListDESC(currentSpeeds);
-                                speedSet = true;
                             }
                         }
                     }
@@ -236,11 +256,25 @@ public class BackgroundService extends Service {
 
         //we have to compare current brightness and speeds with the appData's brightness and speeds
         //to detect if there change happen
-        if (appData != null) {
+        if (appData != null && !appData.isEmpty()) {
             //if brightness is changed then return true
             if (!appData.get(1).equals(brightnessManager.getScreenBrightnessLevel())) {
                 return true;
             }
+
+            //if speed is changed then return true
+            if (isSpeedChanged()) return true;
+        }
+
+        return false;
+    }
+
+    private boolean isSpeedChanged() {
+
+        //we have to compare current speeds with the appData's speeds
+        //to detect if a change happen
+        if (appData != null && !appData.isEmpty()) {
+
             List<Integer> coresSpeeds = cpuManager.getArrayListCoresSpeed();
             for (int i = 0; i < CpuManager.getNumberOfCores(); i++) {
 
@@ -354,8 +388,12 @@ public class BackgroundService extends Service {
 
     //Once receive the request
     public void levelUp() {
-        cpuManager.setSpeedByArrayListASC(currentSpeeds);
+
+        //save current speeds as the current thresholds
         currentThresholds = currentSpeeds;
+        //level up all cores speeds to the next available speed
+        cpuManager.setSpeedByArrayListASC(currentSpeeds);
+
     }
 
     @Override
@@ -407,15 +445,13 @@ public class BackgroundService extends Service {
             String action = intent.getAction();
             log("BroadcastReceiver - onReceive() - action:" + action);
 
-            int value;
             if (action.equals("com.example.raphael.tcc.REQUESTED_MORE_CPU")) {
-                value = intent.getIntExtra("valorCpuUsuario", 0);
-                // update thresho
-                // ld
-                // example if user selected 50% then it will be 0.5
-                threshold = value / 100;
+
                 Log.i(TAG, "Received the REQUEST_MORE_CPU action");
+
+                //user clicked to speed up then call levelUp to increase the speed
                 levelUp();
+                //
                 changeDetector = true;
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
