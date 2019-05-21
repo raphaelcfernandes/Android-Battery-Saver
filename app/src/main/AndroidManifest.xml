@@ -42,6 +42,8 @@
             android:launchMode="singleInstance"/>
 
 
+        <activity android:name="com.example.raphael.tcc.DataBase.AndroidDatabaseManager"
+            android:label = "@string/app_name" />
 
     </application>
 

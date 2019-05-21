@@ -93,7 +93,7 @@ public final class CpuManager {
     }
 
     /**
-     * This should prepare all cores to be userspace governor and also
+     * This should prepare all cores to nbe userspace governor and also
      * it's responsible to fill the matrices about clockLevels and currentClockLevel for each core
      */
     private void prepareCores() {

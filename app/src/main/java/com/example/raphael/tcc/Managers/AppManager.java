@@ -24,6 +24,7 @@ public class AppManager {
     }
 
     // To check the USAGE_STATS_SERVICE permission
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public List<UsageStats> getUsageStatsList(Context context) {
         UsageStatsManager usm = getUsageStatsManager(context);
@@ -42,7 +43,8 @@ public class AppManager {
 
     @TargetApi(Build.VERSION_CODES.M)
     private String getProcessName(List<UsageStats> stats) {
-        log("getProcessName() - listSize:" + stats.size());
+
+      //  log("getProcessName() - listSize:" + stats.size());
         String foregroundProcess = "";
             if(stats != null) {
                 SortedMap<Long,UsageStats> mySortedMap = new TreeMap<>();

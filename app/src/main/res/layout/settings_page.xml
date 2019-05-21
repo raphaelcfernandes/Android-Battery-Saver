@@ -28,4 +28,10 @@
         android:checked="false"
         android:text="@string/bubble_button" />
 
+    <Button
+        android:id="@+id/buttonData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DataBase contorl " />
+
 </LinearLayout>

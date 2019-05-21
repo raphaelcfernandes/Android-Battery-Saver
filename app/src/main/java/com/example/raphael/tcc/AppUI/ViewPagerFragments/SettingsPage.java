@@ -8,9 +8,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import com.example.raphael.tcc.DataBase.AndroidDatabaseManager;
 import com.example.raphael.tcc.R;
 
 /*
@@ -23,6 +25,7 @@ public class SettingsPage extends Fragment
 {
     private Switch bbSwitch; //Will hold the reference to the switch dedicated to BubbleButton
     private Switch notifSwitch; //Will hold the reference to the switch dedicated to SpeedUpNotification
+    private Button database;
 
     public static SettingsPage newInstance()
     {
@@ -41,6 +44,10 @@ public class SettingsPage extends Fragment
         View newView = inflate.inflate(R.layout.settings_page, container, false); //Create fragment
         bbSwitch = newView.findViewById(R.id.BubbleButtonSwitch); //Find the layout of BubbleButton
         notifSwitch = newView.findViewById(R.id.NotificationSwitch); //Find layout of Notification
+
+        database = newView.findViewById(R.id.buttonData); //Find layout of Notification
+
+
         loadSettings();
 
         bbSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -67,6 +74,17 @@ public class SettingsPage extends Fragment
 
             }
         });
+
+        database.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent dbmanager = new Intent(getActivity(), AndroidDatabaseManager.class);
+                startActivity(dbmanager);
+            }
+        });
+
+
+
 
         notifSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {   //Detects a change in the switch position
