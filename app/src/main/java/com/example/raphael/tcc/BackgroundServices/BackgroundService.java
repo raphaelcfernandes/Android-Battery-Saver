@@ -144,8 +144,7 @@ public class BackgroundService extends Service {
 
 
                                 log("Init the new App");
-                                Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
-                                Log.i(TAG, "Init the new App");
+
                                 //Set the CPU to the maximum power
 
                                 cpuManager.adjustConfiguration(appData);
@@ -153,7 +152,7 @@ public class BackgroundService extends Service {
 
 
 
-                                Integer [] arr = new Integer[4];
+                                Integer [] arr = new Integer[CpuManager.getNumberOfCores()];
                                 ArrayList<Integer> myList= new ArrayList<>(Arrays.asList(arr));
                                 Collections.fill(myList, 0);
 
@@ -269,6 +268,9 @@ public class BackgroundService extends Service {
         log("isExcludedApp() - result: " + excludedApps.get(targetApp));
         return excludedApps.get(targetApp) != null;
     }
+
+
+
 
     private static HashMap<String, Boolean> initExcludedAppsList() {
 
@@ -427,11 +429,14 @@ public class BackgroundService extends Service {
         cpuManager.setSpeedByArrayListASC(currentSpeeds);
 
 
-        if (isSpeedChanged()) {
+        if (isSpeedChanged()  && !isExcludedApp) {
             appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
         }
 
     }
+
+
+
 
     @Override
     public void onCreate() {
