@@ -75,17 +75,6 @@ public class SettingsPage extends Fragment
             }
         });
 
-        database.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent dbmanager = new Intent(getActivity(), AndroidDatabaseManager.class);
-                startActivity(dbmanager);
-            }
-        });
-
-
-
-
         notifSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {   //Detects a change in the switch position
             @Override
@@ -107,6 +96,14 @@ public class SettingsPage extends Fragment
                     editor.putBoolean("notification", false);
                     editor.apply();
                 }
+            }
+        });
+
+        database.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent dbmanager = new Intent(getActivity(), AndroidDatabaseManager.class);
+                startActivity(dbmanager);
             }
         });
 

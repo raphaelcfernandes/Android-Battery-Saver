@@ -85,9 +85,8 @@ public class AppDbHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public ArrayList<String> getAppData(int numberOfCores, String AppName) {
-       // log("getAppData() - AppName:" + AppName);
-
+    public AppData getAppData(int numberOfCores, String AppName) {
+        log("getAppData() - AppName:" + AppName);
         //Array list size should be total of the following items
         //1- app name
         //2- brightness value
@@ -111,19 +110,24 @@ public class AppDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + DBContract.APP_DATABASE.TABLE_NAME + " WHERE "
                 + DBContract.APP_DATABASE.APP_NAME + " LIKE ?", new String[]{AppName});
+
+        //
+        AppData appData = new AppData();
+
         if (res.moveToFirst()) {
-            arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.APP_NAME)));
-            arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS)));
+            appData.name = res.getString(res.getColumnIndex(DBContract.APP_DATABASE.APP_NAME));
+            appData.brightness = res.getInt(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_BRIGHTNESS));
+
             for (int x = 0; x < numberOfCores; x++) {
-                arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_CORE + x)));
+                appData.coresSpeeds.add(res.getInt(res.getColumnIndex(DBContract.APP_DATABASE.COLUMN_CORE + x)));
             }
             for (int x = 0; x < numberOfCores; x++) {
-                arrayList.add(res.getString(res.getColumnIndex(DBContract.APP_DATABASE.THRESHOLD + x)));
+                appData.coresThresholds.add(res.getInt(res.getColumnIndex(DBContract.APP_DATABASE.THRESHOLD + x)));
             }
 
         }
         res.close();
-        return arrayList;
+        return appData;
     }
 
     //baw76 method
@@ -212,6 +216,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
         db.close();
         return appData;
     }
+
     public ArrayList<Cursor> getData(String Query){
         //get writable database
         SQLiteDatabase sqlDB = this.getWritableDatabase();
@@ -255,7 +260,7 @@ public class AppDbHelper extends SQLiteOpenHelper {
             return alc;
         }
     }
-
+  
     public void updateAppConfiguration(String APP_NAME, int brightnessLevel, ArrayList<Integer> cpuSpeed, List<Integer> thresholds) {
         log("updateAppConfiguration() - App_NAME:" + APP_NAME + " - brightnessLevel: " + brightnessLevel);
 

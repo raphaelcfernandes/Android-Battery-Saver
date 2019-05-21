@@ -93,7 +93,7 @@ public final class CpuManager {
     }
 
     /**
-     * This should prepare all cores to nbe userspace governor and also
+     * This should prepare all cores to be userspace governor and also
      * it's responsible to fill the matrices about clockLevels and currentClockLevel for each core
      */
     private void prepareCores() {
@@ -276,7 +276,7 @@ public final class CpuManager {
 
             //convert to values to int and save them in a list
             List<Integer> availableFrequenciesList = new ArrayList<>();
-            for(String frequency : availableFrequencies) {
+            for (String frequency : availableFrequencies) {
                 availableFrequenciesList.add(Integer.valueOf(frequency));
             }
 
@@ -300,8 +300,8 @@ public final class CpuManager {
      * @param core
      * @param speed
      */
-    private void writeSpeedOnCore(int core, int speed) {
-        Log.i(this.getClass().getName(), "writeSpeedOnCore: " + core + ", " + speed);
+    public void writeSpeedOnCore(int core, int speed) {
+        log("writeSpeedOnCore: " + core + ", " + speed);
         StringBuilder path = new StringBuilder();
 
         if (speed != 0) {
@@ -354,22 +354,24 @@ public final class CpuManager {
      *
      * @param arrayConfiguration
      */
-    public void adjustConfiguration(ArrayList<String> arrayConfiguration) {
+    public void adjustConfiguration(ArrayList<Integer> arrayConfiguration) {
+        log("adjustConfiguration() - arrayConfiguration:" + arrayConfiguration);
         int x, i;
-
-        //Set all cores to the highest speed.
+        //if configuration is empty then This means that's new app and we should set default setup
+        // and set all cores to the highest speed.
         if (arrayConfiguration.size() == 0) {
             for (i = 0; i < numberOfCores; i++) {
                 turnCoreOnOff(i, true);
-
                 writeSpeedOnCore(i, clockLevels[i][clockLevels[i].length - 1]);
             }
         } else
             //i starts at 2 because index 0 represents the name of the running app
             //and index 1 represents the brightness level
-            for (i = 2, x = 0; i < numberOfCores + 2; i++, x++)
+            for (i = 0; i < numberOfCores; i++) {
                 //Write on core X the frequency represented by index i in arrayConfiguration
-                writeSpeedOnCore(x, Integer.parseInt(arrayConfiguration.get(i)));
+                writeSpeedOnCore(i, arrayConfiguration.get(i));
+
+            }
     }
 
     public void setToMinSpeed() {
@@ -382,6 +384,34 @@ public final class CpuManager {
         }
     }
 
+    public void setCoreSpeed(int core, int speed) {
+        log("setCoreSpeed() - core:" + core + " - speed:" + speed);
+        //if speed is equal 0 then turn off core
+        if (speed == 0) {
+            if (currentClockLevel[core][2] == 1) {
+                writeSpeedOnCore(core, 0);
+            }
+            return;
+        }
+
+        //if speed is less the minimum speed of the core then turn off core if its not the core 0
+        // if its the core 0 then set it to minimum frequency
+        if (speed < clockLevels[core][0]) {
+
+            if (currentClockLevel[core][2] == 1) {
+                if (core != 0){
+                    turnCoreOnOff(core, false);
+                }else {
+                    writeSpeedOnCore(core, clockLevels[core][0]);
+                }
+
+            }
+            return;
+        }
+
+        //apply the speed to core
+        writeSpeedOnCore(core, speed);
+    }
     public List<Integer> setSpeedByArrayListDESC(List<Integer> speedConfiguration) {
         int speed = 0;
         outConfiguration:
@@ -419,7 +449,7 @@ public final class CpuManager {
     public List<Integer> setSpeedByArrayListASC(List<Integer> speedConfiguration) {
         try {
             outConfiguration:
-            for (int i = 0; i < speedConfiguration.size() ; i++) {
+            for (int i = 0; i < speedConfiguration.size(); i++) {
                 //Write on core X the frequency represented by index i in arrayConfiguration
                 for (int m = 0; m < clockLevels[i].length; m++) {
                     if (speedConfiguration.get(i) < clockLevels[i][m]) {
@@ -429,7 +459,7 @@ public final class CpuManager {
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return speedConfiguration;
@@ -509,6 +539,10 @@ public final class CpuManager {
             for (; i < numberOfCores; i++)
                 turnCoreOnOff(i, false);
         }
+    }
+
+    public int getCoreMaxFrequency(int core) {
+        return clockLevels[core][clockLevels[core].length - 1];
     }
 }
 
