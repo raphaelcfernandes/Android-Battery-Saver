@@ -356,14 +356,12 @@ public final class CpuManager {
      */
     public void adjustConfiguration(ArrayList<String> arrayConfiguration) {
         int x, i;
-        //This means that default setup should be loaded
-        //All cores but 0 are turned off
-        //Core 0 frequency is set to be its middle frequency of all possible frequencies
+
         //Set all cores to the highest speed.
         if (arrayConfiguration.size() == 0) {
             for (i = 0; i < numberOfCores; i++) {
                 turnCoreOnOff(i, true);
-                //old one  ONLY WORKED ON THE CORE 0, NOT ALL CORES.
+
                 writeSpeedOnCore(i, clockLevels[i][clockLevels[i].length - 1]);
             }
         } else

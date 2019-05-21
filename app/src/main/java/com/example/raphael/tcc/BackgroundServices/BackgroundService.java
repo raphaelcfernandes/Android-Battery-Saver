@@ -101,7 +101,9 @@ public class BackgroundService extends Service {
                     //Get the App Current Running
                     currentApp = appManager.getAppRunningOnForeground(BackgroundService.this);
                     log("currentApp: " + currentApp + " - lastApp" + lastApp);
+
                     log("appData: " + appData);
+
                     log("isExcludedApp: " + isExcludedApp);
 
                     // If the app changed, we will save the current settings and check new app
@@ -145,8 +147,10 @@ public class BackgroundService extends Service {
                                 Log.i(TAG, "The current app " + currentApp + "does not exist in the database");
                                 Log.i(TAG, "Init the new App");
                                 //Set the CPU to the maximum power
+
                                 cpuManager.adjustConfiguration(appData);
                                 currentSpeeds = cpuManager.getArrayListCoresSpeed();
+
 
 
                                 Integer [] arr = new Integer[4];
@@ -157,18 +161,23 @@ public class BackgroundService extends Service {
 
 
                                 appDbHelper.insertAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+
+
                             } else {
                                 log("The current app " + currentApp + " exist in the database - currentSpeed:" + cpuManager.getArrayListCoresSpeed());
-                                Log.i(TAG, "The current app " + currentApp + " exist in the database");
-                                Log.i(TAG, "Setting the configuration based on the database");
+
                                 //If there is a configuration from database, set the system based on the configuration
                                 if (!speedSet) {
                                     brightnessValue = Integer.parseInt(appData.get(1));
-                                    cpuManager.adjustConfiguration(appData);
-                                    currentSpeeds = cpuManager.getArrayListCoresSpeed();
-                                }
-                                currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
 
+                                    cpuManager.adjustConfiguration(appData);
+
+                                    currentSpeeds = cpuManager.getArrayListCoresSpeed();
+
+
+                                    currentThresholds = getIntegerArray(appData.subList(2 + CpuManager.getNumberOfCores(), appData.size()));
+
+                                }
                                 //Frequency based on the previous saved data
                             }
 
@@ -186,7 +195,7 @@ public class BackgroundService extends Service {
 
                                             if (currentSpeeds.get(i) > currentThresholds.get(i))
 
-                                                coreNewSpeed = (int)(currentSpeeds.get(i) - (currentSpeeds.get(i) * decreasePercentage));
+                                                coreNewSpeed = (int)(currentSpeeds.get(i) - (2265600 * decreasePercentage));
 
                                                 // apply decrease only if the new core speed is greater than or equal the current threshold
                                                 if ( coreNewSpeed >= currentThresholds.get(i)) {
@@ -246,7 +255,7 @@ public class BackgroundService extends Service {
                     cpuManager.setToMinSpeed();
                 }
 
-                Log.i(TAG, "The Thread Finished Running.");
+                log("The Thread Finished Running.");
                 /*} catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }*/
@@ -412,10 +421,15 @@ public class BackgroundService extends Service {
 
         //save current speeds as the current thresholds
         currentThresholds = currentSpeeds;
+        currentSpeeds = cpuManager.getArrayListCoresSpeed();
+
         //level up all cores speeds to the next available speed
         cpuManager.setSpeedByArrayListASC(currentSpeeds);
 
-        appDbHelper.updateAppConfiguration(currentApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+
+        if (isSpeedChanged()) {
+            appDbHelper.updateAppConfiguration(lastApp, brightnessManager.getScreenBrightnessLevel(), cpuManager.getArrayListCoresSpeed(), currentThresholds);
+        }
 
     }
 
@@ -450,17 +464,6 @@ public class BackgroundService extends Service {
         stopService(new Intent(this, BackgroundService.class));
     }
 
-    private void setAppConfiguration(ArrayList<String> appConfiguration) {
-        //Empty ArrayList? No records found -> set to minimum
-        cpuManager.adjustConfiguration(appConfiguration);
-        if (appConfiguration.size() != 0) {
-            brightnessManager.setBrightnessLevel(Integer.parseInt(appConfiguration.get(1)));
-            firstTimeOnSystem = false;
-        } else {
-            brightnessManager.setBrightnessLevel(BrightnessManager.minLevel);
-            firstTimeOnSystem = true;
-        }
-    }
 
     private final BroadcastReceiver broadcastRcv = new BroadcastReceiver() {
         @Override
